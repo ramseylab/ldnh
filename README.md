@@ -18,4 +18,11 @@ You may be asked if you wish to install packages from source; respond "no".
 
 ```source(paste(.libPaths(), "ldnh/exec/process-voltammograms.R", sep="/"))```
 
+Some notes:
+
+- Once you have performed Step 1 once, you should not need to perform it again.
+- Once you have performed Step 2 once, you should only need to perform it again
+unless there is an update to the `ldnh` R package that you want to use within
+your local Rstudio installation.
+- You need to perform Step 3 above, each time you want to process some voltammograms.
 
