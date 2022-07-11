@@ -16,7 +16,7 @@ You may be asked if you wish to install packages from source; respond "no".
 
 3. In the Rstudio Console, run the following command in order to run the analysis script:
 
-```source(paste(.libPaths(), "ldnh/exec/process-voltammograms.R", sep="/"))```
+```ldnh::process_voltammograms()```
 
 Some notes:
 
