@@ -17,7 +17,10 @@ respond `3` (corresponding to "None").
 
 You may be asked if you wish to install packages from source; respond "no".
 
-3. In the Rstudio Console, run the following command in order to run the analysis script:
+3. If you have updated the `ldnh` package (versus installing it for the first time),
+you should quit and restart Rstudio; otherwise, just proceed to Step 4 below.
+
+4. In the Rstudio Console, run the following command in order to run the analysis script:
 
 ```ldnh::process_voltammograms()```
 
