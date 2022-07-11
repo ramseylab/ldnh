@@ -6,7 +6,10 @@ To install this R package, run Rstudio and then follow these steps, in order:
 
 2. Install the R package `ldnh` from GitHub by running the following command in the Rstudio Console:
 
-```remotes::install_github("ramseylab/ldnh")```
+```
+options(install.packages.compile.from.source = "never")
+remotes::install_github("ramseylab/ldnh")
+```
 
 You may be asked "These packages have more recent versions
 available; which would you like to update?"; in that case,
