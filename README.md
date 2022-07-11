@@ -15,8 +15,6 @@ You may be asked "These packages have more recent versions
 available; which would you like to update?"; in that case,
 respond `3` (corresponding to "None").
 
-You may be asked if you wish to install packages from source; respond "no".
-
 3. If you have updated the `ldnh` package (versus installing it for the first time),
 you should quit and restart Rstudio; otherwise, just proceed to Step 4 below.
 
