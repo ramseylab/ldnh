@@ -2,7 +2,7 @@ To install this R package, run Rstudio and then follow these steps, in order:
 
 1. Install the R package `remotes` from CRAN by running the following command in the Rstudio console:
 
-```install.package("remotes")```
+```install.packages("remotes")```
 
 2. Install the R package `ldnh` from GitHub by running the following command in the Rstudio Console:
 
