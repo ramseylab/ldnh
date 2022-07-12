@@ -1,4 +1,11 @@
-# Rstudio installation
+
+# Installing Rstudio
+
+If you do not have Rstudio installed, you might want to install Rstudio as it is a convenient
+way to run R and to interact with the R console. You can get Rstudio for free at the
+[Rstudio website](https://www.rstudio.com/products/rstudio/download/).
+
+# Installing the `ldnh` package into R
 
 To install this R package, run Rstudio and then follow these steps, in order:
 
