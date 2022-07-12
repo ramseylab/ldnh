@@ -60,7 +60,7 @@ data within a window (selected by the user based on the specific analyte and
 biofluid, but whose precise endpoints do not need to be fine-tuned for each
 experiment; the default window edges used for the LDNH code are 1.0 to 1.1 V):
 
-![Fig. 5: a collection of four replicate voltammograms that have been log-transformed, detilted, normalized, and windowed around the peak](fig5-voltammograms-log-detilted-norm-win.png)
+![Fig. 5: a collection of four replicate voltammograms that have been log-transformed, detilted, normalized, and windowed around the peak](fig5-voltammograms-log-detilted-norm-window.png)
 
 The next step of the LDNH procedure is to numerically compute the Hessian at the
 peak in each of the normalized, windowed voltammograms. For samples that no
