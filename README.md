@@ -10,6 +10,68 @@ saves the results in two Excel spreadsheets and in two PDF plot files. The
 that the package implements: *Log-transform*, *De-tilt*, *Normalize*, and
 *Hessian* estimation of the signal.
 
+# How exactly does the LDNH method work?
+
+With our electrochemistry setup, a collection of replicate square-wave
+voltammograms (at a relatively high analyte concentration level) shows
+exponentially increasing absolute current, like this:
+
+![Fig. 1: a collection of four replicate voltammograms that show exponential growth with potential](fig1-voltammograms.png)
+
+Note that the vertical axis title is negative current; the LDNH software expects
+current values to be negative, but we plot `-current` here so that the
+voltammogram ordinant is overall increasing with increasing potential.  Also,
+note that the "15" on the right-hand side of the plot is a facet label
+indicating that the concentration of the analyte for this set of voltammograms
+is 15 in some concentration units (the specific units do not matter for the
+purpose of describing the LDNH method).
+
+The fact that the negative-current voltammogram appears to be (roughly)
+exponentially increasing suggests that we may get a more linear-looking
+voltammogram if we take the logarithm of `-current`, and indeed, that is the 
+case:
+
+![Fig. 2: a collection of four replicate voltammograms with log-transformed current, showing overall approximately linear-looking behavior](fig2-voltammograms-log.png)
+
+The linear behavior, while (from a data analysis convenience standpoint) an
+improvement over exponential curves, is still not ideal. We would like to remove
+the linear tilt to the data, so that we are attempting to quantify the magnitude
+of a relatively unskewed "peak". In order to "detilt" the data, we fit a linear
+model to the voltammogram for potential levels to the left of the peak (by
+default, between 0.5 and 0.9 V, selected by the user based on the analyte and
+the biofluid sample and the electrochemistry setup), and compute the
+log-voltammogram's residuals from that linear fit, like this:
+
+![Fig. 3: a collection of four replicate voltammograms that have been log-transformed and detilted, showing clearly evident peaks at about 1.05 V](fig3-voltammograms-log-detilted.png)
+
+We can now use a peak-finding algorithm to find the peak, and to adjust the voltammograms
+so that the peaks are at the same signal level (this step is not necessary for signal
+extraction via the Hessian method but it makes the replicate variance in the voltammograms
+easier to visualize).
+
+![Fig. 4: a collection of four replicate voltammograms that have been log-transformed, detilted, and normalized so that the peaks have the same ordinate](fig4-voltammograms-log-detilted-norm.png)
+
+The next step of the LDNH procedure is to obtain the normalized voltammogram
+data within a window (selected by the user based on the specific analyte and
+biofluid, but whose precise endpoints do not need to be fine-tuned for each
+experiment; the default window edges used for the LDNH code are 1.0 to 1.1 V):
+
+![Fig. 5: a collection of four replicate voltammograms that have been log-transformed, detilted, normalized, and windowed around the peak](fig5-voltammograms-log-detilted-norm-win.png)
+
+The next step of the LDNH procedure is to numerically compute the Hessian at the
+peak in each of the normalized, windowed voltammograms. For samples that no
+local maximum (typically, samples at zero analyte concentration or at analyte
+concentration below the limit-of-detection for the electrochemical assay), the
+LDNH procedure is to use the average potential level at the peak (which we'll
+call *Vavg* here), for all the samples for which a peak *could* be detected, and
+to numerically compute the Hessian at the potential value *Vavg* for those
+samples for which a peak could not be detected. The negative of the Hessian is
+used as the "signal", resulting in a signal level for each voltammogram, which
+can be visualized as a calibration dot-plot with the sample's labeled (known)
+analyte concentration as the abscissa:
+
+![Fig. 6: a calibration dot-plot produced by the LDNH procedure on the example voltammograms shown in Fig. 5](fig6-final-dot-plot.png)
+
 # Requirements
 
 You will need the R Statistical Computing software ("R") in order to use the
