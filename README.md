@@ -51,6 +51,10 @@ easier to visualize).
 
 ![Fig. 4: a collection of four replicate voltammograms that have been log-transformed, detilted, and normalized so that the peaks have the same ordinate](fig4-voltammograms-log-detilted-norm.png)
 
+The LDNH script saves a PDF plot like this plot (but with a separate subplot
+for each analyte concentration level in the dataset), as one of its two output plots,
+with the filename suffix `-voltammograms-log-detilted-norm.pdf`.
+
 The next step of the LDNH procedure is to obtain the normalized voltammogram
 data within a window (selected by the user based on the specific analyte and
 biofluid, but whose precise endpoints do not need to be fine-tuned for each
@@ -71,6 +75,9 @@ can be visualized as a calibration dot-plot with the sample's labeled (known)
 analyte concentration as the abscissa:
 
 ![Fig. 6: a calibration dot-plot produced by the LDNH procedure on the example voltammograms shown in Fig. 5](fig6-final-dot-plot.png)
+
+The LDNH script saves a PDF plot like this dot plot, as one of its two output plots,
+with the filename suffix `-dot-plot.pdf`.
 
 # Requirements
 
