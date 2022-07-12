@@ -51,7 +51,7 @@ easier to visualize).
 
 ![Fig. 4: a collection of four replicate voltammograms that have been log-transformed, detilted, and normalized so that the peaks have the same ordinate](fig4-voltammograms-log-detilted-norm.png)
 
-The LDNH script saves a PDF plot like this plot (but with a separate subplot
+The LDNH script saves a PDF plot like the above plot (but with a separate plot panel
 for each analyte concentration level in the dataset), as one of its two output plots,
 with the filename suffix `-voltammograms-log-detilted-norm.pdf`.
 
@@ -63,16 +63,19 @@ experiment; the default window edges used for the LDNH code are 1.0 to 1.1 V):
 ![Fig. 5: a collection of four replicate voltammograms that have been log-transformed, detilted, normalized, and windowed around the peak](fig5-voltammograms-log-detilted-norm-window.png)
 
 The next step of the LDNH procedure is to numerically compute the Hessian at the
-peak in each of the normalized, windowed voltammograms. For samples that no
-local maximum (typically, samples at zero analyte concentration or at analyte
-concentration below the limit-of-detection for the electrochemical assay), the
-LDNH procedure is to use the average potential level at the peak (which we'll
-call *Vavg* here), for all the samples for which a peak *could* be detected, and
-to numerically compute the Hessian at the potential value *Vavg* for those
-samples for which a peak could not be detected. The negative of the Hessian is
-used as the "signal", resulting in a signal level for each voltammogram, which
-can be visualized as a calibration dot-plot with the sample's labeled (known)
-analyte concentration as the abscissa:
+peak (i.e., local maximum, which is determined numerically using
+polynomial-smoothed spline interpolation; the Hessian is computed using
+numerical estimation on a spline-interpolated curve) in each of the normalized,
+windowed voltammograms. For samples that no local maximum (typically, samples at
+zero analyte concentration or at analyte concentration below the
+limit-of-detection for the electrochemical assay), the LDNH procedure is to use
+the average potential level at the peak (which we'll call *Vavg* here), for all
+the samples for which a peak *could* be detected, and to numerically compute the
+Hessian at the potential value *Vavg* for those samples for which a peak could
+not be detected. The negative of the Hessian is used as the "signal", resulting
+in a signal level for each voltammogram, which can be visualized as a
+calibration dot-plot with the sample's labeled (known) analyte concentration as
+the abscissa:
 
 ![Fig. 6: a calibration dot-plot produced by the LDNH procedure on the example voltammograms shown in Fig. 5](fig6-final-dot-plot.png)
 
@@ -198,3 +201,65 @@ arranged in a "melted" format of four-tuples, like this:
 
 Note: the `process_voltammograms` function assumes that the input voltammogram
 current values are *negative* as shown in the input file excerpt above.
+
+# Output files
+
+If your input spreadsheet is named `data-20220712.xlsx`, then the `process_voltammograms`
+function will produce four output files:
+
+`data-20220712-dot-plot.pdf`: this is the calibration dot-plot for the data, for example:
+
+![calibration dot plot (this is the same as Fig. 6)](fig6-final-dot-plot.png)
+
+`data-20220712-voltammograms-log-detilted-norm.pdf`: this is a faceted (multi-panel)
+plot of the log-transformed, detilted, and normalized voltammograms, with each
+panel corresponding to a different analyte concentration; for example:
+
+![faceted plot of log-transformed, detilted, and normalized voltammograms, with each facet (subpanel) corresponding to a unique analyte concentration](fig7-voltammograms-log-detilted-norm-faceted)
+
+`data-20220712-processed.xlsx`: this is a spreadsheet providing the quantitative
+data that are shown in the "calibration dot plot"; the `signal` column contains
+the signal for each sample, calculated as the negative of the Hessian at the peak:
+
+| conc\_factor | device | conc | signal |
+| ------------ | ------ | ---- | ------ |
+| 0            | 1      | 0    | 3.90   |
+| 2.5          | 1      | 2.5  | 39.98  |
+| 5            | 1      | 5    | 82.11  |
+| 10           | 1      | 10   | 204.66 |
+| 15           | 1      | 15   | 269.44 |
+| 0            | 2      | 0    | 2.84   |
+| 2.5          | 2      | 2.5  | 62.73  |
+| 5            | 2      | 5    | 97.66  |
+| 10           | 2      | 10   | 195.61 |
+| 15           | 2      | 15   | 259.39 |
+| 0            | 3      | 0    | 0.00   |
+| 2.5          | 3      | 2.5  | 47.25  |
+| 5            | 3      | 5    | 90.60  |
+| 10           | 3      | 10   | 227.99 |
+| 15           | 3      | 15   | 280.43 |
+| 0            | 4      | 0    | 0.00   |
+| 2.5          | 4      | 2.5  | 62.98  |
+| 5            | 4      | 5    | 81.85  |
+| 10           | 4      | 10   | 146.60 |
+| 15           | 4      | 15   | 280.99 |
+| 0            | 5      | 0    | \-6.46 |
+| 2.5          | 5      | 2.5  | 54.32  |
+| 5            | 5      | 5    | 92.02  |
+| 10           | 5      | 10   | 207.02 |
+| 15           | 5      | 15   | 268.44 |
+
+
+`data-20220712-summary.xlsx`: this is a spreadsheet with one row and six
+columns providing the overall summative quantitative results including
+the Pearson product moment coefficient (i.e., sample correlation coefficient *r*)
+of the calibration dot-plot (`r`); the squared correlation coefficient (`r2`);
+the slope (`slope`) and intercept (`intercept`) of the calibration dot-plot; 
+and the average relative error for predicting analyte concentration from the
+extracted signal (using the best-fit calibration line, i.e., the line with the
+returned slope and intercept), computed using the L1 norm (`avg_rel_err_l1`)
+and L2 norm (`avg_rel_err_l2`), respectively:
+
+| avg\_rel\_err\_l1 | avg\_rel\_err\_l2 | r     | r2    | slope | intercept |
+| ----------------- | ----------------- | ----- | ----- | ----- | --------- |
+| 0.329             | 0.147             | 0.989 | 0.977 | 0.053 | \-0.029   |
