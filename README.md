@@ -112,3 +112,5 @@ arranged in a "melted" format of four-tuples, like this:
 | 0.648     | 1      | 0    | \-6.726 |
 | 0.652     | 1      | 0    | \-6.794 |
 
+The `process_voltammograms` function assumes that the current values
+are negative.
