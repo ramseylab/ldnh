@@ -13,7 +13,7 @@ Rstudio for free at the
 
 Rstudio is not required in order to use the `ldnh` R package.
 
-# Installing the `ldnh` package into R
+# Installing the `ldnh` package into R and running the software
 
 To install this R package, run Rstudio (or R) and then follow these steps, in order:
 
