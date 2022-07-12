@@ -1,11 +1,14 @@
 
 # What does this package do?
 
-The `ldnh` package processes square-wave voltammetry data (i.e., "voltammograms")
-to produce, for each voltammgram, a value measuring the magnitude of the analyte
-peak in the voltammogram (i.e., the "signal" value). The package reads in the 
-voltammogram data via an Excel spreadsheet and saves the results in two Excel
-spreadsheets and in two PDF plot files.
+The `ldnh` package processes square-wave voltammetry data (i.e.,
+"voltammograms") to produce, for each voltammgram, a value measuring the
+magnitude of the analyte peak in the voltammogram (i.e., the "signal"
+value). The package reads in the voltammogram data via an Excel spreadsheet and
+saves the results in two Excel spreadsheets and in two PDF plot files. The
+`ldnh` package is named for LDNH, an acronym for the four-step analysis method
+that the package implements: *Log-transform*, *De-tilt*, *Normalize*, and
+*Hessian* estimation of the signal.
 
 # Requirements
 
