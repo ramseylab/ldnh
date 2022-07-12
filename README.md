@@ -13,7 +13,7 @@ Rstudio for free at the
 
 Rstudio is not required in order to use the `ldnh` R package.
 
-# Installing the `ldnh` package into R and running the software
+# Installing the `ldnh` package into R
 
 To install this R package, run Rstudio (or R) and then follow these steps, in order:
 
@@ -33,9 +33,12 @@ available; which would you like to update?"; in that case,
 respond `3` (corresponding to "None").
 
 3. If you have updated the `ldnh` package (versus installing it for the first time),
-you should quit and restart R; otherwise, just proceed to Step 4 below.
+you should quit and restart R; otherwise, just proceed to the section "Running the
+`ldnh` software to process voltammograms" below.
 
-4. In the R console, run the following command in order to run the analysis script:
+# Running the `ldnh` software to process voltammograms
+
+In the R console, run the following command in order to run the analysis script:
 
 ```ldnh::process_voltammograms()```
 
