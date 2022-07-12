@@ -16,7 +16,9 @@ With our electrochemistry setup, a collection of replicate square-wave
 voltammograms (at a relatively high analyte concentration level) shows
 exponentially increasing absolute current, like this:
 
-![Fig. 1: a collection of four replicate voltammograms that show exponential growth with potential](fig1-voltammograms.png)
+**Figure 1:**
+
+![a collection of four replicate voltammograms that show exponential growth with potential](fig1-voltammograms.png)
 
 Note that the vertical axis title is negative current; the LDNH software expects
 current values to be negative, but we plot `-current` here so that the
@@ -31,7 +33,9 @@ exponentially increasing suggests that we may get a more linear-looking
 voltammogram if we take the logarithm of `-current`, and indeed, that is the 
 case:
 
-![Fig. 2: a collection of four replicate voltammograms with log-transformed current, showing overall approximately linear-looking behavior](fig2-voltammograms-log.png)
+**Figure 2:**
+
+![a collection of four replicate voltammograms with log-transformed current, showing overall approximately linear-looking behavior](fig2-voltammograms-log.png)
 
 The linear behavior, while (from a data analysis convenience standpoint) an
 improvement over exponential curves, is still not ideal. We would like to remove
@@ -42,14 +46,16 @@ default, between 0.5 and 0.9 V, selected by the user based on the analyte and
 the biofluid sample and the electrochemistry setup), and compute the
 log-voltammogram's residuals from that linear fit, like this:
 
-![Fig. 3: a collection of four replicate voltammograms that have been log-transformed and detilted, showing clearly evident peaks at about 1.05 V](fig3-voltammograms-log-detilted.png)
+**Figure 3:**
+![a collection of four replicate voltammograms that have been log-transformed and detilted, showing clearly evident peaks at about 1.05 V](fig3-voltammograms-log-detilted.png)
 
 We can now use a peak-finding algorithm to find the peak, and to adjust the voltammograms
 so that the peaks are at the same signal level (this step is not necessary for signal
 extraction via the Hessian method but it makes the replicate variance in the voltammograms
 easier to visualize).
 
-![Fig. 4: a collection of four replicate voltammograms that have been log-transformed, detilted, and normalized so that the peaks have the same ordinate](fig4-voltammograms-log-detilted-norm.png)
+**Figure 4:**
+![a collection of four replicate voltammograms that have been log-transformed, detilted, and normalized so that the peaks have the same ordinate](fig4-voltammograms-log-detilted-norm.png)
 
 The LDNH script saves a PDF plot like the above plot (but with a separate plot panel
 for each analyte concentration level in the dataset), as one of its two output plots,
@@ -60,7 +66,8 @@ data within a window (selected by the user based on the specific analyte and
 biofluid, but whose precise endpoints do not need to be fine-tuned for each
 experiment; the default window edges used for the LDNH code are 1.0 to 1.1 V):
 
-![Fig. 5: a collection of four replicate voltammograms that have been log-transformed, detilted, normalized, and windowed around the peak](fig5-voltammograms-log-detilted-norm-window.png)
+**Figure 5:**
+![a collection of four replicate voltammograms that have been log-transformed, detilted, normalized, and windowed around the peak](fig5-voltammograms-log-detilted-norm-window.png)
 
 The next step of the LDNH procedure is to numerically compute the Hessian at the
 peak (i.e., local maximum, which is determined numerically using
@@ -77,7 +84,8 @@ in a signal level for each voltammogram, which can be visualized as a
 calibration dot-plot with the sample's labeled (known) analyte concentration as
 the abscissa:
 
-![Fig. 6: a calibration dot-plot produced by the LDNH procedure on the example voltammograms shown in Fig. 5](fig6-final-dot-plot.png)
+**Figure 6:**
+![a calibration dot-plot produced by the LDNH procedure on the example voltammograms shown in Fig. 5](fig6-final-dot-plot.png)
 
 The LDNH script saves a PDF plot like this dot plot, as one of its two output plots,
 with the filename suffix `-dot-plot.pdf`.
@@ -207,14 +215,14 @@ current values are *negative* as shown in the input file excerpt above.
 If your input spreadsheet is named `data-20220712.xlsx`, then the `process_voltammograms`
 function will produce four output files:
 
-`data-20220712-dot-plot.pdf`: this is the calibration dot-plot for the data, for example:
-
-![calibration dot plot (this is the same as Fig. 6)](fig6-final-dot-plot.png)
+`data-20220712-dot-plot.pdf`: this is the calibration dot-plot for the data; for an example,
+see Figure&nbsp;6.
 
 `data-20220712-voltammograms-log-detilted-norm.pdf`: this is a faceted (multi-panel)
 plot of the log-transformed, detilted, and normalized voltammograms, with each
 panel corresponding to a different analyte concentration; for example:
 
+**Figure 7:**
 ![faceted plot of log-transformed, detilted, and normalized voltammograms, with each facet (subpanel) corresponding to a unique analyte concentration](fig7-voltammograms-log-detilted-norm-faceted.png)
 
 `data-20220712-processed.xlsx`: this is a spreadsheet providing the quantitative
@@ -263,3 +271,16 @@ and L2 norm (`avg_rel_err_l2`), respectively:
 | avg\_rel\_err\_l1 | avg\_rel\_err\_l2 | r     | r2    | slope | intercept |
 | ----------------- | ----------------- | ----- | ----- | ----- | --------- |
 | 0.329             | 0.147             | 0.989 | 0.977 | 0.053 | \-0.029   |
+
+# Why do you use the Hessian at the peak, to obtain the signal?
+
+In Figure 7, notice how the peak widths do not change with increasing analyte
+concentration; only the peak heights change. For a peak height to increase with
+the width staying the same, the magnitude of the second derivative (Hessian, or
+curvature) at the peak must also increase. Furthermore, estimating the instantaneous
+curvature at the peak *does not require picking a baseline abscissa from which to
+compute the peak height*. The lack of a need to choose a baseline level is a major
+advantage to the Hessian method, resulting in the relatively small variation
+in signal levels for each group of marks (i.e., at each analyte concentration level)
+in Figure 6.
+
