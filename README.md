@@ -19,7 +19,9 @@ To install this R package, run Rstudio (or R) and then follow these steps, in or
 
 1. Install the R package `remotes` from CRAN by running the following command in the Rstudio console:
 
-```install.packages("remotes")```
+```
+install.packages("remotes")
+```
 
 2. Install the R package `ldnh` from GitHub by running the following command in the R Console:
 
@@ -36,19 +38,23 @@ respond `3` (corresponding to "None").
 you should quit and restart R; otherwise, just proceed to the section "Running the
 `ldnh` software to process voltammograms" below.
 
-# Running the `ldnh` software to process voltammograms
-
-In the R console, run the following command in order to run the analysis script:
-
-```ldnh::process_voltammograms()```
-
-Some notes:
+### Notes
 
 - Once you have performed Step 1 once, you should not need to perform it again.
 - Once you have performed Step 2 once, you should only need to perform it again
 unless there is an update to the `ldnh` R package that you want to use within
 your local R installation.
 - You need to perform Step 3 above, each time you want to process some voltammograms.
+
+# Running the `ldnh` software to process voltammograms
+
+In the R console, run the following command in order to run the analysis script:
+
+```ldnh::process_voltammograms()```
+
+The script is meant to be used interactively. It will prompt you to type in responses
+via the console, though in theory it could be automated by using shell redirection to
+use a file to supply responses to the prompts.
 
 # Input spreadsheet format:
 
