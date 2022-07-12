@@ -280,7 +280,7 @@ analyze_fitter_and_extractor <- function(raw_df_fac,
                     avg_rel_err_l2=pct_error_avg_l2,
                     r=corrcoef,
                     r2=corrcoef*corrcoef,
-                    slope=model_coefficients["signl"],
+                    slope=model_coefficients["signal"],
                     intercept=model_coefficients["(Intercept)"],
                     all_results=res_with_signals)
 
