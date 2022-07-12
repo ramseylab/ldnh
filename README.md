@@ -1,21 +1,25 @@
 
 # Requirements
 
-You will need R in order to use this software. You can get R for free at the 
-[CRAN website](https://cran.r-project.org/).
+You will need the R Statistical Computing software ("R") in order to use the
+`ldnh` software package. You can get R for free at the
+[CRAN website](https://cran.r-project.org/). In theory, the `ldnh` software
+package should work whether your R installed on Mac, Windows, or Linux; but to
+date, we have only tested `ldnh` on Mac.
 
 # Installing Rstudio
 
-If you do not have Rstudio installed, you might want to install it; Rstudio 
-provides an Integrated Development Environment (IDE) for using R. You can get
-Rstudio for free at the
+If you do not have Rstudio installed, you might want to install it in order to
+make it easier to use the `ldnh` software; Rstudio provides an Integrated
+Development Environment (IDE) for using R. You can get Rstudio for free at the
 [Rstudio website](https://www.rstudio.com/products/rstudio/download/).
 
 Rstudio is not required in order to use the `ldnh` R package.
 
 # Installing the `ldnh` package into R
 
-To install this R package, run Rstudio (or R) and then follow these steps, in order:
+To install this R package, run Rstudio (or start an R session) and then follow
+these steps, in order:
 
 1. Install the R package `remotes` from CRAN by running the following command in the Rstudio console:
 
