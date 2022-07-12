@@ -215,7 +215,7 @@ function will produce four output files:
 plot of the log-transformed, detilted, and normalized voltammograms, with each
 panel corresponding to a different analyte concentration; for example:
 
-![faceted plot of log-transformed, detilted, and normalized voltammograms, with each facet (subpanel) corresponding to a unique analyte concentration](fig7-voltammograms-log-detilted-norm-faceted)
+![faceted plot of log-transformed, detilted, and normalized voltammograms, with each facet (subpanel) corresponding to a unique analyte concentration](fig7-voltammograms-log-detilted-norm-faceted.png)
 
 `data-20220712-processed.xlsx`: this is a spreadsheet providing the quantitative
 data that are shown in the "calibration dot plot"; the `signal` column contains
