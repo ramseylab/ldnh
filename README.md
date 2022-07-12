@@ -196,5 +196,5 @@ arranged in a "melted" format of four-tuples, like this:
 | 0.648     | 1      | 0    | \-6.726 |
 | 0.652     | 1      | 0    | \-6.794 |
 
-The `process_voltammograms` function assumes that the current values
-are negative.
+Note: the `process_voltammograms` function assumes that the input voltammogram
+current values are *negative* as shown in the input file excerpt above.
