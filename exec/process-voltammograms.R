@@ -1,6 +1,19 @@
 #!/usr/bin/env Rscript
 
-library(magrittr)
+## TODO:
+##  - see if we can remove the "library(magrittr)" from this script
+##  - add slope and intercept estimates to the results spreadsheet
+##  - move defaults to the top of the script
+
+## library(magrittr)
+
+detilt_start_v_default <- 0.5
+detilt_end_v_default <- 0.9
+
+peakfind_start_v_default <- 1.0
+peakfind_end_v_default <- 1.1
+
+
 
 plot_conc_faceted_voltammograms <- function(df, cur_var, ylab, file_name) {
     min_voltage <- min(df$potential)
@@ -315,10 +328,6 @@ if (nchar(sheet_index)==0) {
     sheet_index <- as.integer(sheet_index)
 }
 
-detilt_start_v_default <- 0.5
-detilt_end_v_default <- 0.9
-
-
 cat(sprintf("Specify the starting voltage for the detilting procedure, as a floating-point number [default: %f] ", detilt_start_v_default))
 detilt_start_v <- readLines(file_stdin, 1)
 if (nchar(detilt_start_v) == 0) {
@@ -334,10 +343,6 @@ if (nchar(detilt_end_v) == 0) {
 } else {
     detilt_end_v <- as.numeric(detilt_end_v)
 }
-
-
-peakfind_start_v_default <- 1.0
-peakfind_end_v_default <- 1.1
 
 
 cat(sprintf("Specify the starting voltage for the peakfinding procedure, as a floating-point number [default: %f] ", peakfind_start_v_default))
