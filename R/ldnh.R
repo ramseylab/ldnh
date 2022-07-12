@@ -295,6 +295,7 @@ process_voltammograms <- function() {
     fork::signal("SIGINT", "default")
 
     file_stdin <- file('stdin', 'r')
+    on.exit(close(file_stdin)) ## SO:6304073
 
     args <- commandArgs(trailingOnly=TRUE)
     if (length(args) > 0) {
