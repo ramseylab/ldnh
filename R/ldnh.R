@@ -266,7 +266,7 @@ analyze_fitter_and_extractor <- function(raw_df_fac,
     if (! is.null(plot_file_prefix)) {
         plot_conc_faceted_voltammograms(raw_fac_with_resid_df, "resid", "signal",
                                        paste(plot_file_prefix,
-                                             "voltammograms-log-rel-sub-resid.pdf",
+                                             "-voltammograms-log-detilted-norm.pdf",
                                              sep=""))
 
         p <- ggplot2::ggplot(data=res_with_signals,
