@@ -74,13 +74,13 @@ the peak (i.e., the Hessian, or equivalently, the curvature at the *local
 maximum,* which is determined numerically using polynomial-smoothed spline
 interpolation; the Hessian is computed using numerical estimation on a
 spline-interpolated curve) in each of the normalized, windowed
-voltammograms. For samples that no local maximum (typically, samples at zero
-analyte concentration or at analyte concentration below the limit-of-detection
-for the electrochemical assay), the LDNH procedure is to use the average
-potential level at the peak (which we'll call *Vavg* here), for all the samples
-for which a peak *could* be detected, and to numerically compute the second
-derivative at the potential value *Vavg* for those samples for which a peak
-could not be detected. The negative of the Hessian is used as the "signal",
+voltammograms. For samples that have no local maximum (typically, samples at
+zero analyte concentration or at analyte concentration below the
+limit-of-detection for the electrochemical assay), the LDNH procedure is to use
+the average potential level at the peak (which we'll call *Vavg* here), for all
+the samples for which a peak *could* be detected, and to numerically compute the
+second derivative at the potential value *Vavg* for those samples for which a
+peak could not be detected. The negative of the Hessian is used as the "signal",
 resulting in a signal level for each voltammogram, which can be visualized as a
 calibration dot-plot with the sample's labeled (known) analyte concentration as
 the abscissa:
