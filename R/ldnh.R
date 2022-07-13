@@ -298,8 +298,7 @@ analyze_fitter_and_extractor <- function(raw_df_fac,
 process_voltammograms <- function() {
     fork::signal("SIGINT", "default")
 
-    file_stdin <- file('stdin', 'r')
-    on.exit(close(file_stdin)) ## SO:6304073
+#    on.exit(close(stdin())) ## SO:6304073
 
     args <- commandArgs(trailingOnly=TRUE)
     if (length(args) > 0) {
@@ -308,7 +307,7 @@ process_voltammograms <- function() {
     } else {
 
         cat("Specify the file (xlsx format) of melted data to load: ")
-        file_spec <- readLines(file_stdin, n=1)
+        file_spec <- readLines(n=1)
 
         if (nchar(file_spec)==0) {
             stop("response to prompt was empty; expected a nonzero-length response")
@@ -321,7 +320,7 @@ process_voltammograms <- function() {
 
     cat("Load worksheet number: [1] ")
 
-    sheet_index <- readLines(file_stdin, n=1)
+    sheet_index <- readLines(n=1)
 
     if (nchar(sheet_index)==0) {
         sheet_index <- 1
@@ -330,7 +329,7 @@ process_voltammograms <- function() {
     }
 
     cat(sprintf("Specify the starting voltage for the detilting procedure, as a floating-point number [default: %f] ", detilt_start_v_default))
-    detilt_start_v <- readLines(file_stdin, 1)
+    detilt_start_v <- readLines(n=1)
     if (nchar(detilt_start_v) == 0) {
         detilt_start_v <- detilt_start_v_default
     } else {
@@ -338,7 +337,7 @@ process_voltammograms <- function() {
     }
 
     cat(sprintf("Specify the ending voltage for the detilting procedure, as a floating-point number [default: %f] ", detilt_end_v_default))
-    detilt_end_v <- readLines(file_stdin, 1)
+    detilt_end_v <- readLines(n=1)
     if (nchar(detilt_end_v) == 0) {
         detilt_end_v <- detilt_end_v_default
     } else {
@@ -347,7 +346,7 @@ process_voltammograms <- function() {
 
 
     cat(sprintf("Specify the starting voltage for the peakfinding procedure, as a floating-point number [default: %f] ", peakfind_start_v_default))
-    peakfind_start_v <- readLines(file_stdin, 1)
+    peakfind_start_v <- readLines(n=1)
     if (nchar(peakfind_start_v) == 0) {
         peakfind_start_v <- peakfind_start_v_default
     } else {
@@ -355,7 +354,7 @@ process_voltammograms <- function() {
     }
 
     cat(sprintf("Specify the ending voltage for the peakfinding procedure, as a floating-point number [default: %f] ", peakfind_end_v_default))
-    peakfind_end_v <- readLines(file_stdin, 1)
+    peakfind_end_v <- readLines(n=1)
     if (nchar(peakfind_end_v) == 0) {
         peakfind_end_v <- peakfind_end_v_default
     } else {
@@ -378,10 +377,22 @@ process_voltammograms <- function() {
 
     output_file_spec_prefix_default <- strsplit(file_spec, "\\.xlsx")[[1]]
     cat(sprintf("Specify the filespec prefix to be used for output files: [%s] ", output_file_spec_prefix_default))
-    output_file_spec_prefix <- readLines(file_stdin, 1)
+    output_file_spec_prefix <- readLines(n=1)
     if (nchar(output_file_spec_prefix) == 0) {
         output_file_spec_prefix <- output_file_spec_prefix_default
     }
+
+    log_file_name <- paste(output_file_spec_prefix, "-run.log", sep="")
+    sink(log_file_name)
+    on.exit(sink(NULL))
+
+    writeLines(c("ldnh package: running process_voltammograms",
+                 as.character(Sys.time()),
+                 as.character(sessionInfo()),
+                 commandArgs(),
+                 sprintf("Voltage range to be used for detilting: %f - %f V", detilt_start_v, detilt_end_v),
+                 sprintf("Voltage range to be used for peakfinding: %f - %f V", peakfind_start_v, peakfind_end_v),
+                 sprintf("Input file: %s", file_spec)), sep="\n")
 
     xlsx::read.xlsx(file_spec, sheetIndex=sheet_index, header=TRUE) %>%  ## need magrittr pipe here
         within({
@@ -414,13 +425,19 @@ process_voltammograms <- function() {
               curr_var="rel_log_neg_current_sub",
               plot_file_prefix=output_file_spec_prefix) -> results
 
+    output_file_processed <- paste(output_file_spec_prefix, "-processed.xlsx", sep="")
+    writeLines(c(sprintf("Saving processed data to file: %s", output_file_processed)), sep="\n")
+
     xlsx::write.xlsx(results$all_results,
-                     file=paste(output_file_spec_prefix, "-processed.xlsx", sep=""),
+                     file=output_file_processed,
                      col.names=TRUE,
                      row.names=FALSE)
 
+    output_file_summary <- paste(output_file_spec_prefix, "-summary.xlsx", sep="")
+    writeLines(c(sprintf("Saving summary data to file: %s", output_file_summary)), sep="\n")
+    
     xlsx::write.xlsx(data.frame(results[names(results)[which(names(results) != "all_results")]]),
-                     file=paste(output_file_spec_prefix, "-summary.xlsx", sep=""),
+                     file=output_file_summary,
                      col.names=TRUE,
                      row.names=FALSE)
 }
