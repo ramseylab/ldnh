@@ -280,8 +280,11 @@ concentration; only the peak heights change. For a peak height to increase with
 the width staying the same, the magnitude of the second derivative at the peak
 (Hessian, or peak curvature) must also increase. Furthermore, estimating the
 instantaneous curvature at the peak *does not require picking a baseline
-abscissa from which to compute the peak height*. The lack of a need to choose a
-baseline level is a major advantage to the Hessian method, resulting in the
-relatively small variation in signal levels for each group of marks (i.e., at
-each analyte concentration level) in Figure 6.
+abscissa from which to compute the peak height*. For samples such as saliva that
+are complex biofluids that can lead to large and variable background
+contributions to the voltammogram current, which in turn makes selection of the
+baseline for peak height estimation challenging to objectively define.  The lack
+of a need to choose a baseline level is a major advantage of the Hessian method,
+resulting in the relatively small variation in signal levels for each group of
+marks (i.e., at each analyte concentration level) in Figure 6.
 
