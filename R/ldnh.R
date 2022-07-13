@@ -1,3 +1,5 @@
+## TODO: have the script write a .log file of all the settings used to run it
+
 #'
 #' @import xlsx remotes Rdistance magrittr ggplot2 fork SplinesUtils
 #'
