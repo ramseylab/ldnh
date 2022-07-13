@@ -387,11 +387,11 @@ process_voltammograms <- function() {
     on.exit(sink(NULL))
 
     writeLines(c("ldnh package: running process_voltammograms",
-                 as.character(Sys.time()),
+                 sprintf("Run started at: %s", as.character(Sys.time())),
                  as.character(sessionInfo()),
                  commandArgs(),
-                 sprintf("Voltage range to be used for detilting: %f - %f V", detilt_start_v, detilt_end_v),
-                 sprintf("Voltage range to be used for peakfinding: %f - %f V", peakfind_start_v, peakfind_end_v),
+                 sprintf("Potential range to be used for detilting: %f - %f V", detilt_start_v, detilt_end_v),
+                 sprintf("Potential range to be used for peakfinding: %f - %f V", peakfind_start_v, peakfind_end_v),
                  sprintf("Input file: %s", file_spec)), sep="\n")
 
     xlsx::read.xlsx(file_spec, sheetIndex=sheet_index, header=TRUE) %>%  ## need magrittr pipe here
@@ -440,4 +440,6 @@ process_voltammograms <- function() {
                      file=output_file_summary,
                      col.names=TRUE,
                      row.names=FALSE)
+
+    writeLines(c(sprintf("Run completed at: %s", as.character(Sys.time()))), sep="\n")
 }
