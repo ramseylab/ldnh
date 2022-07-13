@@ -69,18 +69,19 @@ experiment; the default window edges used for the LDNH code are 1.0 to 1.1 V):
 **Figure 5:**
 ![a collection of four replicate voltammograms that have been log-transformed, detilted, normalized, and windowed around the peak](fig5-voltammograms-log-detilted-norm-window.png)
 
-The next step of the LDNH procedure is to numerically compute the Hessian at the
-peak (i.e., local maximum, which is determined numerically using
-polynomial-smoothed spline interpolation; the Hessian is computed using
-numerical estimation on a spline-interpolated curve) in each of the normalized,
-windowed voltammograms. For samples that no local maximum (typically, samples at
-zero analyte concentration or at analyte concentration below the
-limit-of-detection for the electrochemical assay), the LDNH procedure is to use
-the average potential level at the peak (which we'll call *Vavg* here), for all
-the samples for which a peak *could* be detected, and to numerically compute the
-Hessian at the potential value *Vavg* for those samples for which a peak could
-not be detected. The negative of the Hessian is used as the "signal", resulting
-in a signal level for each voltammogram, which can be visualized as a
+The next step of the LDNH procedure is to numerically compute the curvature at
+the peak (i.e., the Hessian, or equivalently, the curvature at the *local
+maximum,* which is determined numerically using polynomial-smoothed spline
+interpolation; the Hessian is computed using numerical estimation on a
+spline-interpolated curve) in each of the normalized, windowed
+voltammograms. For samples that no local maximum (typically, samples at zero
+analyte concentration or at analyte concentration below the limit-of-detection
+for the electrochemical assay), the LDNH procedure is to use the average
+potential level at the peak (which we'll call *Vavg* here), for all the samples
+for which a peak *could* be detected, and to numerically compute the second
+derivative at the potential value *Vavg* for those samples for which a peak
+could not be detected. The negative of the Hessian is used as the "signal",
+resulting in a signal level for each voltammogram, which can be visualized as a
 calibration dot-plot with the sample's labeled (known) analyte concentration as
 the abscissa:
 
@@ -227,7 +228,7 @@ panel corresponding to a different analyte concentration; for example:
 
 `data-20220712-processed.xlsx`: this is a spreadsheet providing the quantitative
 data that are shown in the "calibration dot plot"; the `signal` column contains
-the signal for each sample, calculated as the negative of the Hessian at the peak:
+the signal for each sample, calculated as the negative of the curvature at the peak:
 
 | conc\_factor | device | conc | signal |
 | ------------ | ------ | ---- | ------ |
@@ -276,11 +277,11 @@ and L2 norm (`avg_rel_err_l2`), respectively:
 
 In Figure 7, notice how the peak widths do not change with increasing analyte
 concentration; only the peak heights change. For a peak height to increase with
-the width staying the same, the magnitude of the second derivative (Hessian, or
-curvature) at the peak must also increase. Furthermore, estimating the instantaneous
-curvature at the peak *does not require picking a baseline abscissa from which to
-compute the peak height*. The lack of a need to choose a baseline level is a major
-advantage to the Hessian method, resulting in the relatively small variation
-in signal levels for each group of marks (i.e., at each analyte concentration level)
-in Figure 6.
+the width staying the same, the magnitude of the second derivative at the peak
+(Hessian, or peak curvature) must also increase. Furthermore, estimating the
+instantaneous curvature at the peak *does not require picking a baseline
+abscissa from which to compute the peak height*. The lack of a need to choose a
+baseline level is a major advantage to the Hessian method, resulting in the
+relatively small variation in signal levels for each group of marks (i.e., at
+each analyte concentration level) in Figure 6.
 
