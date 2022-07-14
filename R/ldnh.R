@@ -74,14 +74,23 @@ detilt_linear_model <- function(df, new_variable_name, potential_range) {
     df
 }
 
+is_unix <- function() {
+    .Platform$OS.type == "unix"
+}
+
 find_stationary_points <- function(x, y) {
     ## from SO:48720040
     sm <- smooth.spline(x, y)
     oo <- SplinesUtils::SmoothSplineAsPiecePoly(sm)
     {
-##        sink("/dev/null")
+        if (is_unix()) {
+            sink("/dev/null")
+        } else {
+            ## we must be on windows
+            sink("nul")
+        }
         xs <- solve(oo, deriv=1)
-##        sink()
+        sink()
     }
     ys <- predict(oo, xs)
     list(x=xs, y=ys, oo=oo, sm=sm)
@@ -442,4 +451,87 @@ process_voltammograms <- function() {
                      row.names=FALSE)
 
     writeLines(c(sprintf("Run completed at: %s", as.character(Sys.time()))), sep="\n")
+}
+
+
+get_voltammograms <- function(file_name) {
+    read.table(file_name,
+               sep=",",
+               header=TRUE,
+               skip=22) %>%
+        setNames(c("potential", "current", "forward", "reverse")) %>%
+        `[`(c("potential", "current"))
+}
+
+get_data <- function(file_name) {
+    match_res <- stringr::str_match(file_name, "^(\\d+)_(\\d+)_(\\d+)_cbz([\\dp]+)_(\\d+).txt$")
+    if (is.na(match_res[1, 1])) {
+        stop(sprintf("Unable to process metadata from filename: %s", file_name))
+    }
+    year_str <- match_res[1, 2]
+    if (nchar(year_str) == 2) {
+        year_str <- paste("20", year_str, sep="")
+    }
+    year <- as.integer(year_str)
+    month_str <- match_res[1, 3]
+    month <- as.integer(month_str)
+    day_str <- match_res[1, 4]
+    day <- as.integer(day_str)
+    melted_file_name <- sprintf("melted-data-%04d%02d%02d.xlsx", year, month, day)
+    conc <- as.numeric(gsub("p", ".", match_res[, 5]))
+    device_str <- match_res[, 6]
+    device <- as.integer(device_str)
+    metadata_df <- data.frame(melted_file_name=melted_file_name, device=device, conc=conc, row.names=file_name)
+    v_df <- get_voltammograms(file_name)
+    metadata_df %>% 
+        replicate(n=nrow(v_df), ., simplify=FALSE) %>%
+        do.call(rbind, .) %>%
+        cbind(v_df) %>%
+        within({current <- 1e+6 * current}) -> final_df
+
+    final_df
+}
+
+
+#' Convert raw text data file from the potentiostat (one file per voltammogram)
+#' to a single spreadsheet containing all of the voltammograms in a melted
+#' form, with four columns: potential, device, conc, current. Current is in
+#' microamperes.
+#' @export
+#' @examples
+#' convert_raw_to_melted_xlsx()
+
+convert_raw_to_melted_xlsx <- function() {
+    all_files <- list.files(pattern=".txt$")
+    writeLines(c("Files found: ", all_files),
+               sep="\n")
+    cat("Proceed? (answer y or n) [y]: ")
+    response <- readLines(n=1)
+    if (nchar(response) != 0 &&
+        tolower(response) != "y") {
+        cat("Exiting\n")
+        return
+    }
+
+    all_files %>%
+        lapply(get_data) %>%
+        do.call(rbind, .) ->
+        final_df
+
+    stopifnot(! is.na(final_df$conc))
+    stopifnot(! is.na(final_df$device))
+
+    uniq_melted_file_name <- unique(final_df$melted_file_name)
+    stopifnot(length(uniq_melted_file_name)==1)
+
+    melted_file_name <- uniq_melted_file_name[1]
+
+    final_df$melted_file_name <- NULL
+    
+    xlsx::write.xlsx(final_df[, c("potential", "device", "conc", "current")],
+                     file=melted_file_name,
+                     col.names=TRUE,
+                     row.names=FALSE)
+
+    cat(sprintf("Saved output as melted data spreadsheet: %s\n", melted_file_name))
 }
