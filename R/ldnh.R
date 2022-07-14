@@ -1,7 +1,7 @@
 ## TODO: have the script write a .log file of all the settings used to run it
 
 #'
-#' @import xlsx remotes Rdistance magrittr ggplot2 fork SplinesUtils
+#' @import xlsx remotes Rdistance magrittr ggplot2 SplinesUtils  
 #'
 function() {}  ## this is required in order to force roxygen2::roxygenise to
                ## generate "import" directives in the NAMESPACE file
@@ -296,7 +296,7 @@ analyze_fitter_and_extractor <- function(raw_df_fac,
 #' process_voltammograms()
 
 process_voltammograms <- function() {
-    fork::signal("SIGINT", "default")
+#    fork::signal("SIGINT", "default")
 
 #    on.exit(close(stdin())) ## SO:6304073
 
