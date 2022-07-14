@@ -79,9 +79,9 @@ find_stationary_points <- function(x, y) {
     sm <- smooth.spline(x, y)
     oo <- SplinesUtils::SmoothSplineAsPiecePoly(sm)
     {
-        sink("/dev/null")
+##        sink("/dev/null")
         xs <- solve(oo, deriv=1)
-        sink()
+##        sink()
     }
     ys <- predict(oo, xs)
     list(x=xs, y=ys, oo=oo, sm=sm)
