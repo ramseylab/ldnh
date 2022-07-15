@@ -235,7 +235,7 @@ fit_and_evaluate_calibration_curve <- function(results_list,
                              ggplot2::aes(conc, signal, colour=device)) +
             ggplot2::theme_classic() +
             ggplot2::geom_point()
-        ggplot2::ggsave(p, file=paste(plot_file_prefix, "-dot-plot.pdf", sep=""), width=3, height=3)        
+        ggplot2::ggsave(p, file=paste(plot_file_prefix, "-dot-plot.pdf", sep=""), width=4, height=3)        
     }
 
     c(results_list,
@@ -280,6 +280,11 @@ analyze_fitter_and_extractor <- function(raw_df_fac,
         do.call(rbind, .)
 
     if (! is.null(plot_file_prefix)) {
+       plot_conc_faceted_voltammograms(raw_fac_with_resid_df, "neg_current", "signal",
+                                       paste(plot_file_prefix,
+                                             "-voltammograms.pdf",
+                                             sep=""))
+
        plot_conc_faceted_voltammograms(raw_fac_with_resid_df, "log_neg_current", "signal",
                                        paste(plot_file_prefix,
                                              "-voltammograms-log.pdf",
@@ -445,7 +450,7 @@ process_voltammograms <- function(fit_calibration=TRUE, file_name=NULL) {
     output_file_processed <- paste(output_file_spec_prefix, "-processed.xlsx", sep="")
     writeLines(c(sprintf("Saving processed data to file: %s", output_file_processed)), sep="\n")
 
-    xlsx::write.xlsx(results$all_results,
+    xlsx::write.xlsx(within(results$all_results, {conc_factor <- NULL}),
                      file=output_file_processed,
                      col.names=TRUE,
                      row.names=FALSE)
