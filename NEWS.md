@@ -2,6 +2,7 @@
 
     - Change analysis method to use a smoothed spline fit to censored data, for
       background model
+    - Added MIT license.
     
 # version 0.0.2.9000
 
