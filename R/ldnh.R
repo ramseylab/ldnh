@@ -1,4 +1,14 @@
-## TODO: have the script write a .log file of all the settings used to run it
+## lndh: an R package for processing square-wave voltammetry data
+## Created by: Stephen Ramsey, Oregon State University
+## License and copyright:  see file `LICENSE`.
+
+## ---------- GLOBAL DEFAULT PARAMETER VALUES ---------
+detilt_start_v_default <- 1.00
+detilt_end_v_default <- 1.15
+
+peakfind_start_v_default <- 1.00
+peakfind_end_v_default <- 1.10
+## ----------------------------------------------------
 
 #'
 #' @import xlsx remotes Rdistance magrittr ggplot2 SplinesUtils  
@@ -6,12 +16,6 @@
 function() {}  ## this is required in order to force roxygen2::roxygenise to
                ## generate "import" directives in the NAMESPACE file
 
-
-detilt_start_v_default <- 1.00
-detilt_end_v_default <- 1.15
-
-peakfind_start_v_default <- 1.00
-peakfind_end_v_default <- 1.10
 
 plot_conc_faceted_voltammograms <- function(df, cur_var, ylab, file_name) {
     min_voltage <- min(df$potential)
