@@ -4,11 +4,22 @@
 \alias{process_voltammograms}
 \title{Run the script \code{process-voltammograms.R} that is installed in the \code{ldnh} package.}
 \usage{
-process_voltammograms()
+process_voltammograms(fit_calibration = TRUE, file_name = NULL)
+}
+\arguments{
+\item{fit_calibration}{A logical indicating whether or not a calibration
+curve should be fit to the signal-vs-concentration data; if TRUE, then
+the \code{-processed.xlsx} output spreadsheet is generated; if FALSE, then the
+\code{-processed.xlsx} output spreadsheet is not generated. Default: TRUE}
+
+\item{file_name}{An optional string specifying the location of the
+spreadsheet (xlsx format) of melted data to be processed.}
 }
 \description{
 Run the script \code{process-voltammograms.R} that is installed in the \code{ldnh} package.
 }
 \examples{
 process_voltammograms()
+process_voltammograms(fit_calibration=FALSE)
+process_voltammograms(fit_calibration=TRUE, file_name="melted-data-20220429.xlsx")
 }

@@ -7,13 +7,11 @@ function() {}  ## this is required in order to force roxygen2::roxygenise to
                ## generate "import" directives in the NAMESPACE file
 
 
-detilt_start_v_default <- 0.5
-detilt_end_v_default <- 0.9
+detilt_start_v_default <- 1.00
+detilt_end_v_default <- 1.15
 
-peakfind_start_v_default <- 1.0
-peakfind_end_v_default <- 1.1
-
-
+peakfind_start_v_default <- 1.00
+peakfind_end_v_default <- 1.10
 
 plot_conc_faceted_voltammograms <- function(df, cur_var, ylab, file_name) {
     min_voltage <- min(df$potential)
@@ -44,32 +42,23 @@ transform_signals_to_conc <- function(signal_values, model_coefficients) {
     conc_values <- fit_intercept + signal_values*fit_slope
 }
 
-
-detilt_linear_model <- function(df, new_variable_name, potential_range) {
+detilt_linear_model <- function(df, input_y_variable_name, output_y_variable_name, potential_range) {
     start_potential <- potential_range[1]
     end_potential <- potential_range[2]
     stopifnot(end_potential > start_potential)
-    lmodel <- lm(log_neg_current ~ potential,
-                data=subset(df, potential >= start_potential & potential <= end_potential))
-    
-    ## obtain the voltammograms of the zero-concentration (i.e., "blank") samples;
-    avg_zero_conc_voltammogram <- subset(df, conc_factor=="0") %>%
-    ## average the zero-conc voltammograms into a single representative voltammogram
-        aggregate(cbind(current, neg_current, log_neg_current) ~ potential,
-                  data=.,
-                  FUN=mean)
 
-    ## normalize log2 voltammograms to the average log2 voltammogram of the blank
-    ## (i.e., zero conc) voltammogram
-    df <- lapply(levels(df$conc_factor), function(level) {
+    lapply(levels(df$conc_factor), function(level) {
         dat_sub <- subset(df, conc_factor==level)
         lapply(levels(dat_sub$device), function(dev) {
-            dat_sub_sub <- subset(dat_sub, device==dev)
-            dat_sub_sub[[new_variable_name]] <- dat_sub_sub$log_neg_current -
-                avg_zero_conc_voltammogram$log_neg_current
+            dat_sub_sub <- subset(dat_sub, device==dev) 
+            dat_sub_sub_censored <- subset(dat_sub_sub, potential <= start_potential |
+                                                        potential >= end_potential)
+            spline_model <- SplinesUtils::SmoothSplineAsPiecePoly(smooth.spline(dat_sub_sub_censored$potential,
+                                                                                dat_sub_sub_censored[[input_y_variable_name]]))
+            dat_sub_sub[[output_y_variable_name]] <- dat_sub_sub[[input_y_variable_name]] - predict(spline_model, dat_sub_sub$potential)
             dat_sub_sub
         }) %>% do.call(rbind, .)
-    }) %>% do.call(rbind, .)
+    }) %>% do.call(rbind, .) -> df
 
     df
 }
@@ -97,9 +86,10 @@ find_stationary_points <- function(x, y) {
 }
 
 
-make_curves_kiss_avg <- function(df, new_variable_name, window_region) {
+find_and_mark_peaks <- function(df, input_y_var_name, peak_x_var_name, window_region) {
     window_left <- window_region[1]
     window_right <- window_region[2]
+    window_center <- 0.5*(window_left + window_right)
        
     ## adjust the voltammograms so that they have zero signal value at the "window center"
     lapply(levels(df$conc_factor), function(level) {
@@ -107,27 +97,26 @@ make_curves_kiss_avg <- function(df, new_variable_name, window_region) {
         lapply(levels(dat_sub$device), function(dev) {
             dat_sub_sub <- subset(dat_sub, device==dev)
             sp_list <- find_stationary_points(dat_sub_sub$potential,
-                                              dat_sub_sub$rel_log_neg_current)
-            use_default_window_center <- FALSE
+                                              dat_sub_sub[[input_y_var_name]])
+
+            x_use <- NA
+            
             if (length(sp_list$x) == 0) {
-                use_default_window_center <- TRUE
                 cat(sprintf("no stationary points found in the whole potential range; conc=%0.1f; device=%d\n",
                               dat_sub_sub$conc[1],
-                              dat_sub_sub$device[1]))
+                            dat_sub_sub$device[1]))
             } else {
                 sp_list_subset <- subset(data.frame(sp_list[c("x", "y")]),
                                          x >= window_left &
                                          x <= window_right)
                 if (nrow(sp_list_subset) == 1) {
-                    y_use <- sp_list_subset$y
                     x_use <- sp_list_subset$x
-                    cat(sprintf("one stationary point within the default window; conc=%0.1f; device=%d; y=%0.3f\n",
-                                  dat_sub_sub$conc[1],
-                                  dat_sub_sub$device[1],
-                                  y_use))
+                    cat(sprintf("one stationary point within the default window; conc=%0.1f; device=%d; x=%0.3f\n",
+                                dat_sub_sub$conc[1],
+                                dat_sub_sub$device[1],
+                                x_use))
                 } else {
                     if (nrow(sp_list_subset) == 0) {
-                        use_default_window_center <- TRUE
                         cat(sprintf("no stationary points found in the default window; conc=%0.1f; device=%d\n",
                                     dat_sub_sub$conc[1],
                                     dat_sub_sub$device[1]))
@@ -137,63 +126,60 @@ make_curves_kiss_avg <- function(df, new_variable_name, window_region) {
                         }
                         hvals <- sapply(sp_list_subset$x, function(x) {
                             Rdistance::secondDeriv(x, FUN=sec_deriv_func)})
-                        min_ind <- which.max(abs(hvals))
+                        min_ind <- which.min(hvals)
                         y_use <- sp_list_subset$y[min_ind]
                         x_use <- sp_list_subset$x[min_ind]
+                        cat(sprintf("out of %d stationary points, picking the one with most negative 2nd deriv; conc=%0.1f; device=%d; at x=%0.3f\n",
+                                    length(hvals),
+                                    dat_sub_sub$conc[1],
+                                    dat_sub_sub$device[1],
+                                    x_use))
                     }
                 }
             }
 
-            if (use_default_window_center) {
-                x_use <- NA
-                y_use <- NA
-            } 
-            dat_sub_sub$y_use <- y_use
-            dat_sub_sub$window_center <- x_use
-            dat_sub_sub[[new_variable_name]] <- dat_sub_sub$rel_log_neg_current - y_use
+            dat_sub_sub$peak_potential <- x_use
             dat_sub_sub
         }) %>% do.call(rbind, .)
     }) %>% do.call(rbind, .) -> df
 
-    avg_peak_center <- mean(df$window_center, na.rm=TRUE)
+    avg_peak_center <- mean(df$peak_potential, na.rm=TRUE)
+    if (is.nan(avg_peak_center)) {
+        cat(sprintf("No samples had a stationary point within the window; using the window center %0.3f\n", window_center))
+        avg_peak_center <- window_center
+    }
 
     lapply(levels(df$conc_factor), function(level) {
         dat_sub <- subset(df, conc_factor==level)
         lapply(levels(dat_sub$device), function(dev) {
             dat_sub_sub <- subset(dat_sub, device==dev)
-            if (is.na(dat_sub_sub$window_center[1])) {
-                x_use <- avg_peak_center
-                y_use <- approx(dat_sub_sub$potential,
-                                dat_sub_sub$rel_log_neg_current,
-                                avg_peak_center)$y
-                dat_sub_sub$y_use <- y_use
-                dat_sub_sub$window_center <- x_use
-            } else {
-                y_use <- dat_sub_sub$y_use[1]
-            }
-            dat_sub_sub[[new_variable_name]] <- dat_sub_sub$rel_log_neg_current - y_use
+            dat_sub_sub[[peak_x_var_name]] <- if (! is.na(dat_sub_sub$peak_potential[1])) {
+                                                    dat_sub_sub$peak_potential[1]
+                                                } else {
+                                                    avg_peak_center
+                                                }
             dat_sub_sub
         }) %>% do.call(rbind, .)
     }) %>% do.call(rbind, .)
 }
 
-make_signal_extractor_hessian <- function() {
+make_signal_extractor_hessian <- function(eval_hessian_at_potential_var_name, input_y_var_name, output_y_var_name) {
     function(df) {
         sub_df <- subset(df, in_window)
-        sm <- smooth.spline(sub_df$potential, sub_df$resid)
-        window_center <- sub_df$window_center[1]
+        sm <- smooth.spline(sub_df$potential, sub_df[[input_y_var_name]])
+        window_center <- sub_df[[eval_hessian_at_potential_var_name]][1]
         res_df <- df[1, c("conc_factor", "device", "conc"), drop=FALSE]
-        res_df$signal <- as.vector(-Rdistance::secondDeriv(window_center, FUN=function(x) {predict(sm, x)$y}))
+        res_df[[output_y_var_name]] <- as.vector(-Rdistance::secondDeriv(window_center, FUN=function(x) {predict(sm, x)$y}))
         res_df
     }
 }
 
-window_data <- function(df, new_variable_name, window_width) {
+window_data <- function(df, peak_x_variable_name, new_variable_name, window_width) {
     lapply(levels(df$conc_factor), function(level) {
         dat_sub <- subset(df, conc_factor==level)
         lapply(levels(dat_sub$device), function(dev) {
             dat_sub_sub <- subset(dat_sub, device==dev)
-            window_center <- dat_sub_sub[1, "window_center"]
+            window_center <- dat_sub_sub[1, peak_x_variable_name]
             window_left <- window_center - 0.5*window_width
             window_right <- window_center + 0.5*window_width
             dat_sub_sub[[new_variable_name]] <- FALSE
@@ -207,46 +193,11 @@ window_data <- function(df, new_variable_name, window_width) {
 }
 
 
-## For a melted data frame "raw_df_fac" of voltammograms for various analyte
-## concentrations, and given various hyperparameter values, compute a "signal"
-## value from the residuals produced by the `residuals calculator` function
-## passed as an arg; find the best-fit linear model relating the analyte
-## concentration to signal values; compute the Pearson product-moment
-## coefficient between the signal values and the annotated carbamzepine levels,
-## and also back-convert each signal value to an estimated analyte level and
-## compute the average normalized error between the estimated and actual analyte
-## concentration, across all analyte concentrations and replicates; return the
-## results as a list. 
-analyze_fitter_and_extractor <- function(raw_df_fac,
-                                         make_residual_calculator,
-                                         residual_calculator_params,
-                                         make_signal_extractor,
-                                         signal_extractor_params,
-                                         curr_var,
-                                         plot_file_prefix=NULL) {
+fit_and_evaluate_calibration_curve <- function(results_list,
+                                               plot_file_prefix=NULL) {
 
-    ## make the Gaussian Process smoother that works on the windowed votammagram
-    residual_calculator <- do.call(make_residual_calculator,
-                                   residual_calculator_params)
-
-    ## make the function that extracts the signal
-    signal_extractor <- do.call(make_signal_extractor,
-                                signal_extractor_params)
-
-    ## make a data frame with the original data, but also with a new column "resid"
-    ## containing the residuals from the Gaussian Process fit
-    raw_fac_with_resid <- raw_df_fac %>%
-        split(list(conc_factor=raw_df_fac$conc_factor, device=raw_df_fac$device)) %>%
-        lapply(residual_calculator) 
-
-    ## stack the data frames (one for each voltammogram) into a single tall data frame
-    raw_fac_with_resid_df <- do.call(rbind, raw_fac_with_resid)
-
-    ## make a data frame with the conc level, the device number, and the final signal value
-    res_with_signals <- raw_fac_with_resid %>%
-        lapply(signal_extractor) %>%
-        do.call(rbind, .)
-
+    res_with_signals <- results_list$all_results
+    
     ## make a calibration line from all the data
     model_fit <- lm(conc~signal, data=res_with_signals)
 
@@ -275,11 +226,6 @@ analyze_fitter_and_extractor <- function(raw_df_fac,
     
     ## make plots if a plotting filename prefix is provided
     if (! is.null(plot_file_prefix)) {
-        plot_conc_faceted_voltammograms(raw_fac_with_resid_df, "resid", "signal",
-                                       paste(plot_file_prefix,
-                                             "-voltammograms-log-detilted-norm.pdf",
-                                             sep=""))
-
         p <- ggplot2::ggplot(data=res_with_signals,
                              ggplot2::aes(conc, signal, colour=device)) +
             ggplot2::theme_classic() +
@@ -287,32 +233,89 @@ analyze_fitter_and_extractor <- function(raw_df_fac,
         ggplot2::ggsave(p, file=paste(plot_file_prefix, "-dot-plot.pdf", sep=""), width=3, height=3)        
     }
 
-    results <- list(avg_rel_err_l1=pct_error_avg_l1,
-                    avg_rel_err_l2=pct_error_avg_l2,
-                    r=corrcoef,
-                    r2=corrcoef*corrcoef,
-                    slope=model_coefficients["signal"],
-                    intercept=model_coefficients["(Intercept)"],
-                    all_results=res_with_signals)
+    c(results_list,
+        list(avg_rel_err_l1=pct_error_avg_l1,
+             avg_rel_err_l2=pct_error_avg_l2,
+             r=corrcoef,
+             r2=corrcoef*corrcoef,
+             slope=model_coefficients["signal"],
+             intercept=model_coefficients["(Intercept)"]))
+}
 
-    ## return the performance data via a list
-    results
+
+## For a melted data frame "raw_df_fac" of voltammograms for various analyte
+## concentrations, and given various hyperparameter values, compute a "signal"
+## value from the residuals produced by the `residuals calculator` function
+## passed as an arg; find the best-fit linear model relating the analyte
+## concentration to signal values; compute the Pearson product-moment
+## coefficient between the signal values and the annotated carbamzepine levels,
+## and also back-convert each signal value to an estimated analyte level and
+## compute the average normalized error between the estimated and actual analyte
+## concentration, across all analyte concentrations and replicates; return the
+## results as a list. 
+analyze_fitter_and_extractor <- function(raw_df_fac,
+                                         make_signal_extractor,
+                                         signal_extractor_params,
+                                         curr_var,
+                                         plot_file_prefix=NULL) {
+
+    ## make the function that extracts the signal
+    signal_extractor <- do.call(make_signal_extractor,
+                                signal_extractor_params)
+
+    raw_fac_with_resid <- raw_df_fac %>%
+        split(list(conc_factor=raw_df_fac$conc_factor, device=raw_df_fac$device)) 
+
+    ## stack the data frames (one for each voltammogram) into a single tall data frame
+    raw_fac_with_resid_df <- do.call(rbind, raw_fac_with_resid)
+
+    ## make a data frame with the conc level, the device number, and the final signal value
+    res_with_signals <- raw_fac_with_resid %>%
+        lapply(signal_extractor) %>%
+        do.call(rbind, .)
+
+    if (! is.null(plot_file_prefix)) {
+       plot_conc_faceted_voltammograms(raw_fac_with_resid_df, "log_neg_current", "signal",
+                                       paste(plot_file_prefix,
+                                             "-voltammograms-log.pdf",
+                                             sep=""))
+         
+       plot_conc_faceted_voltammograms(raw_fac_with_resid_df, "rel_log_neg_current", "signal",
+                                       paste(plot_file_prefix,
+                                             "-voltammograms-log-detilted.pdf",
+                                             sep=""))
+    }
+    
+    list(all_results=res_with_signals)
 }
 
 #' Run the script `process-voltammograms.R` that is installed in the `ldnh` package.
+#'
+#' @param fit_calibration A logical indicating whether or not a calibration
+#'     curve should be fit to the signal-vs-concentration data; if TRUE, then
+#'     the `-processed.xlsx` output spreadsheet is generated; if FALSE, then the
+#'     `-processed.xlsx` output spreadsheet is not generated. Default: TRUE
+#' @param file_name An optional string specifying the location of the
+#'     spreadsheet (xlsx format) of melted data to be processed.
 #' @export
 #' @examples
 #' process_voltammograms()
+#' process_voltammograms(fit_calibration=FALSE)
+#' process_voltammograms(fit_calibration=TRUE, file_name="melted-data-20220429.xlsx")
 
-process_voltammograms <- function() {
+process_voltammograms <- function(fit_calibration=TRUE, file_name=NULL) {
 #    fork::signal("SIGINT", "default")
 
 #    on.exit(close(stdin())) ## SO:6304073
 
     args <- commandArgs(trailingOnly=TRUE)
-    if (length(args) > 0) {
-        file_spec <- args[1]
-        cat(sprintf("Loading input from file: %s", file_spec))
+    if (length(args) > 0 || ! is.null(file_name)) {
+        file_spec <- if (length(args) > 0) {
+                         args[1]
+                     } else {
+                         file_name
+                     }
+        cat(sprintf("Loading input from file: %s\n", file_spec))
     } else {
 
         cat("Specify the file (xlsx format) of melted data to load: ")
@@ -401,6 +404,7 @@ process_voltammograms <- function() {
                  commandArgs(),
                  sprintf("Potential range to be used for detilting: %f - %f V", detilt_start_v, detilt_end_v),
                  sprintf("Potential range to be used for peakfinding: %f - %f V", peakfind_start_v, peakfind_end_v),
+                 sprintf("User requested that a calibration curve be fit: %s", as.character(fit_calibration)),
                  sprintf("Input file: %s", file_spec)), sep="\n")
 
     xlsx::read.xlsx(file_spec, sheetIndex=sheet_index, header=TRUE) %>%  ## need magrittr pipe here
@@ -415,24 +419,26 @@ process_voltammograms <- function() {
             log_neg_current <- log2(neg_current)
         }) |>
         
-        ## de-tilt the voltammograms by subtracting the average of the blanks
-        ##        detilt_data_avg_blanks("rel_log_neg_current") magrittr::%>%
-        detilt_linear_model("rel_log_neg_current", c(detilt_start_v, detilt_end_v)) |>
+        ## de-tilt the voltammograms by subtracting the spline-fitted baseline
+        detilt_linear_model("log_neg_current",
+                            "rel_log_neg_current",
+                            c(detilt_start_v, detilt_end_v)) |>
 
     ## adjust the voltammograms so that they have zero signal value at the "window center";
     ## we are going to search for a local maximum in the range [1.0, 1.1] volts
-    make_curves_kiss_avg("rel_log_neg_current_sub",
-                               c(peakfind_start_v, peakfind_end_v)) |>
+    find_and_mark_peaks("rel_log_neg_current",
+                        "eval_hessian_at_potential",
+                        c(peakfind_start_v, peakfind_end_v)) |>
     ## subset the data to a window of 0.1 volts width around the center that we found
-    window_data("in_window", 0.5*(peakfind_end_v - peakfind_start_v)) |>
+    window_data("eval_hessian_at_potential", "in_window", 0.5*(peakfind_end_v - peakfind_start_v)) |>
     
     analyze_fitter_and_extractor(
-              make_residual_calculator_passthrough,
-              residual_calculator_params=list(current_var="rel_log_neg_current_sub"),
-              make_signal_extractor=make_signal_extractor_hessian,
-              signal_extractor_params=list(),
-              curr_var="rel_log_neg_current_sub",
-              plot_file_prefix=output_file_spec_prefix) -> results
+        make_signal_extractor=make_signal_extractor_hessian,
+        signal_extractor_params=list(eval_hessian_at_potential_var_name="eval_hessian_at_potential",
+                                     input_y_var_name="rel_log_neg_current",
+                                     output_y_var_name="signal"),
+        curr_var="rel_log_neg_current_sub",
+        plot_file_prefix=output_file_spec_prefix) -> results
 
     output_file_processed <- paste(output_file_spec_prefix, "-processed.xlsx", sep="")
     writeLines(c(sprintf("Saving processed data to file: %s", output_file_processed)), sep="\n")
@@ -442,13 +448,19 @@ process_voltammograms <- function() {
                      col.names=TRUE,
                      row.names=FALSE)
 
-    output_file_summary <- paste(output_file_spec_prefix, "-summary.xlsx", sep="")
-    writeLines(c(sprintf("Saving summary data to file: %s", output_file_summary)), sep="\n")
+    if (fit_calibration) {
+
+        results <- fit_and_evaluate_calibration_curve(results, 
+                                                      plot_file_prefix=output_file_spec_prefix)
+ 
+        output_file_summary <- paste(output_file_spec_prefix, "-summary.xlsx", sep="")
+        writeLines(c(sprintf("Saving summary data to file: %s", output_file_summary)), sep="\n")
     
-    xlsx::write.xlsx(data.frame(results[names(results)[which(names(results) != "all_results")]]),
-                     file=output_file_summary,
-                     col.names=TRUE,
-                     row.names=FALSE)
+        xlsx::write.xlsx(data.frame(results[names(results)[which(names(results) != "all_results")]]),
+                         file=output_file_summary,
+                         col.names=TRUE,
+                         row.names=FALSE)
+    }
 
     writeLines(c(sprintf("Run completed at: %s", as.character(Sys.time()))), sep="\n")
 }
