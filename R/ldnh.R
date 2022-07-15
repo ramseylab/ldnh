@@ -309,9 +309,6 @@ analyze_fitter_and_extractor <- function(raw_df_fac,
 #' process_voltammograms(fit_calibration=TRUE, file_name="melted-data-20220429.xlsx")
 
 process_voltammograms <- function(fit_calibration=TRUE, file_name=NULL) {
-#    fork::signal("SIGINT", "default")
-
-#    on.exit(close(stdin())) ## SO:6304073
 
     args <- commandArgs(trailingOnly=TRUE)
     if (length(args) > 0 || ! is.null(file_name)) {
