@@ -1,6 +1,7 @@
 ## lndh: an R package for processing square-wave voltammetry data
 ## Created by: Stephen Ramsey, Oregon State University
-## License and copyright:  see file `LICENSE`.
+## License and copyright:  see file `LICENSE` and see
+## documentation in github:ramseylab/ldnh-private
 
 ## ---------- GLOBAL DEFAULT PARAMETER VALUES ---------
 detilt_start_v_default <- 1.00
