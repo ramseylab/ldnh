@@ -1,3 +1,9 @@
+# version 0.1.1.9000
+
+    - In the `-processed.xlsx` file, save (for each sample) the potential at
+      which the local maximum (analyte peak) was found, in column
+      `peak_potential`.
+    
 # version 0.1.0.9000
 
     - Change analysis method to use a smoothed spline fit to censored data, for
