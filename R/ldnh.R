@@ -176,7 +176,7 @@ make_signal_extractor_hessian <- function(eval_hessian_at_potential_var_name,
         sm <- smooth.spline(sub_df$potential, sub_df[[input_y_var_name]])
         window_center <- sub_df[[eval_hessian_at_potential_var_name]][1]
         res_df <- df[1, c("conc_factor", "device", "conc"), drop=FALSE]
-        res_df[[eval_hessian_at_potential_var_name]] <- sub_df[["peak_potential"]][1]
+        res_df[["peak_potential"]] <- sub_df[["peak_potential"]][1]
         res_df[[output_y_var_name]] <- as.vector(-Rdistance::secondDeriv(window_center, FUN=function(x) {predict(sm, x)$y}))
         res_df
     }
