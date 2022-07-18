@@ -56,6 +56,9 @@ detilt_linear_model <- function(df, input_y_variable_name, output_y_variable_nam
         dat_sub <- subset(df, conc_factor==level)
         lapply(levels(dat_sub$device), function(dev) {
             dat_sub_sub <- subset(dat_sub, device==dev) 
+            if (nrow(dat_sub_sub) == 0) {
+                return(NULL)
+            }
             dat_sub_sub_censored <- subset(dat_sub_sub, potential <= start_potential |
                                                         potential >= end_potential)
             spline_model <- SplinesUtils::SmoothSplineAsPiecePoly(smooth.spline(dat_sub_sub_censored$potential,
@@ -101,6 +104,9 @@ find_and_mark_peaks <- function(df, input_y_var_name, peak_x_var_name, window_re
         dat_sub <- subset(df, conc_factor==level)
         lapply(levels(dat_sub$device), function(dev) {
             dat_sub_sub <- subset(dat_sub, device==dev)
+            if (nrow(dat_sub_sub) == 0) {
+                return(NULL)
+            }
             sp_list <- find_stationary_points(dat_sub_sub$potential,
                                               dat_sub_sub[[input_y_var_name]])
 
@@ -158,6 +164,9 @@ find_and_mark_peaks <- function(df, input_y_var_name, peak_x_var_name, window_re
         dat_sub <- subset(df, conc_factor==level)
         lapply(levels(dat_sub$device), function(dev) {
             dat_sub_sub <- subset(dat_sub, device==dev)
+            if (nrow(dat_sub_sub) == 0) {
+                return(NULL)
+            }
             dat_sub_sub[[peak_x_var_name]] <- if (! is.na(dat_sub_sub$peak_potential[1])) {
                                                     dat_sub_sub$peak_potential[1]
                                                 } else {
@@ -172,6 +181,9 @@ make_signal_extractor_hessian <- function(eval_hessian_at_potential_var_name,
                                           input_y_var_name,
                                           output_y_var_name) {
     function(df) {
+        if (nrow(df) ==0) {
+            return(NULL)
+        }
         sub_df <- subset(df, in_window)
         sm <- smooth.spline(sub_df$potential, sub_df[[input_y_var_name]])
         window_center <- sub_df[[eval_hessian_at_potential_var_name]][1]
@@ -187,6 +199,9 @@ window_data <- function(df, peak_x_variable_name, new_variable_name, window_widt
         dat_sub <- subset(df, conc_factor==level)
         lapply(levels(dat_sub$device), function(dev) {
             dat_sub_sub <- subset(dat_sub, device==dev)
+            if (nrow(dat_sub_sub) == 0) {
+                return(NULL)
+            }
             window_center <- dat_sub_sub[1, peak_x_variable_name]
             window_left <- window_center - 0.5*window_width
             window_right <- window_center + 0.5*window_width
