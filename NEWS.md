@@ -1,3 +1,10 @@
+# version 0.1.2.9000
+
+    - Script can now handle the case where there are different combinations
+    of device identifiers (i.e., device/replicate numbers) used at different
+    analyte concentration levels. Prior to this fix, in such a use-case, 
+    the script would error out with an obscure and un-helpful error message.
+
 # version 0.1.1.9000
 
     - In the `-processed.xlsx` file, save (for each sample) the potential at
