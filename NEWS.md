@@ -1,8 +1,3 @@
-# version 0.1.3.9000
-
-    - Now uses Gaussian kernel smoothing before the detiling procedure,
-    for compatibility with data from the SIMStat.
-    
 # version 0.1.2.9000
 
     - Script can now handle the case where there are different combinations
