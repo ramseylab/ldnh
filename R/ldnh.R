@@ -9,6 +9,8 @@ detilt_end_v_default <- 1.15
 
 peakfind_start_v_default <- 1.00
 peakfind_end_v_default <- 1.10
+
+bandwidth_default <- 0.05
 ## ----------------------------------------------------
 
 #'
@@ -47,7 +49,7 @@ transform_signals_to_conc <- function(signal_values, model_coefficients) {
     conc_values <- fit_intercept + signal_values*fit_slope
 }
 
-detilt_linear_model <- function(df, input_y_variable_name, output_y_variable_name, potential_range) {
+detilt_spline_censored_data <- function(df, input_y_variable_name, output_y_variable_name, potential_range) {
     start_potential <- potential_range[1]
     end_potential <- potential_range[2]
     stopifnot(end_potential > start_potential)
@@ -331,6 +333,23 @@ analyze_fitter_and_extractor <- function(raw_df_fac,
 #' process_voltammograms(fit_calibration=FALSE)
 #' process_voltammograms(fit_calibration=TRUE, file_name="melted-data-20220429.xlsx")
 
+smooth_data <- function(df, invar, outvar, bandwidth) {
+    lapply(levels(df$conc_factor), function(level) {
+        dat_sub <- subset(df, conc_factor==level)
+        lapply(levels(dat_sub$device), function(dev) {
+            dat_sub_sub <- subset(dat_sub, device==dev) 
+            if (nrow(dat_sub_sub) == 0) {
+                return(NULL)
+            }
+            dat_sub_sub[[outvar]] <- ksmooth(dat_sub_sub$potential,
+                                             dat_sub_sub[[invar]],
+                                             kernel="normal",
+                                             bandwidth=bandwidth)$y
+            dat_sub_sub
+        }) %>% do.call(rbind, .)
+    }) %>% do.call(rbind, .)
+}
+
 process_voltammograms <- function(fit_calibration=TRUE, file_name=NULL) {
 
     args <- commandArgs(trailingOnly=TRUE)
@@ -398,17 +417,29 @@ process_voltammograms <- function(fit_calibration=TRUE, file_name=NULL) {
         peakfind_end_v <- as.numeric(peakfind_end_v)
     }
 
-    allowed_column_names <- c("potential",
+    required_column_names <- c("potential",
                               "device",
                               "conc",
                               "current")
 
+    cat(sprintf("Specify the bandwidth for smoothing the data [default: %f] ", bandwidth_default))
+    bandwidth <- readLines(n=1)
+    if (nchar(bandwidth) == 0) {
+        bandwidth <- bandwidth_default
+    } else {
+        bandwidth <- as.numeric(bandwidth)
+    }
+
+    required_column_names <- c("potential",
+                              "device",
+                              "conc",
+                              "current")
     {   ## just red the first line of the file, and check that the column names are correct
         df <- xlsx::read.xlsx(file_spec, sheetIndex=sheet_index, header=TRUE, endRow=2)
 
-        if (! all(names(df) %in% allowed_column_names)) {
-            stop(sprintf("Column name(s) in the file that are not recognized: %s",
-                         paste(names(df)[which(! (names(df) %in% allowed_column_names))])))
+        if (! all(required_column_names %in% names(df))) {
+            stop(sprintf("Column name(s) missing from the file: %s",
+                         paste(required_column_names[which(! (required_column_names %in% names(df)))])))
         }
     }
 
@@ -443,11 +474,15 @@ process_voltammograms <- function(fit_calibration=TRUE, file_name=NULL) {
             ## log2-transform the voltammograms
             log_neg_current <- log2(neg_current)
         }) |>
-        
+
+    smooth_data("log_neg_current",
+                "log_neg_current_smoothed",
+                bandwidth) |>
+    
         ## de-tilt the voltammograms by subtracting the spline-fitted baseline
-        detilt_linear_model("log_neg_current",
-                            "rel_log_neg_current",
-                            c(detilt_start_v, detilt_end_v)) |>
+        detilt_spline_censored_data("log_neg_current_smoothed",
+                                    "rel_log_neg_current",
+                                    c(detilt_start_v, detilt_end_v)) |>
 
     ## adjust the voltammograms so that they have zero signal value at the "window center";
     ## we are going to search for a local maximum in the range [1.0, 1.1] volts
@@ -455,8 +490,16 @@ process_voltammograms <- function(fit_calibration=TRUE, file_name=NULL) {
                         "eval_hessian_at_potential",
                         c(peakfind_start_v, peakfind_end_v)) |>
     ## subset the data to a window of 0.1 volts width around the center that we found
-    window_data("eval_hessian_at_potential", "in_window", 0.5*(peakfind_end_v - peakfind_start_v)) |>
+    window_data("eval_hessian_at_potential", "in_window", 0.5*(peakfind_end_v - peakfind_start_v)) -> df
+
+    output_file_processed <- paste(output_file_spec_prefix, "-processed.xlsx", sep="")
+    writeLines(c(sprintf("Saving processed data to file: %s", output_file_processed)), sep="\n")
+    xlsx::write.xlsx(df,
+                     file=output_file_processed,
+                     col.names=TRUE,
+                     row.names=FALSE)
     
+    df |>
     analyze_fitter_and_extractor(
         make_signal_extractor=make_signal_extractor_hessian,
         signal_extractor_params=list(eval_hessian_at_potential_var_name="eval_hessian_at_potential",
@@ -465,11 +508,11 @@ process_voltammograms <- function(fit_calibration=TRUE, file_name=NULL) {
         curr_var="rel_log_neg_current_sub",
         plot_file_prefix=output_file_spec_prefix) -> results
 
-    output_file_processed <- paste(output_file_spec_prefix, "-processed.xlsx", sep="")
-    writeLines(c(sprintf("Saving processed data to file: %s", output_file_processed)), sep="\n")
+    output_file_samples <- paste(output_file_spec_prefix, "-samples.xlsx", sep="")
+    writeLines(c(sprintf("Saving sample-level data to file: %s", output_file_samples)), sep="\n")
 
     xlsx::write.xlsx(within(results$all_results, {conc_factor <- NULL}),
-                     file=output_file_processed,
+                     file=output_file_samples,
                      col.names=TRUE,
                      row.names=FALSE)
 
