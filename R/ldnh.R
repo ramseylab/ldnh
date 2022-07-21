@@ -494,10 +494,12 @@ process_voltammograms <- function(fit_calibration=TRUE, file_name=NULL) {
 
     output_file_processed <- paste(output_file_spec_prefix, "-processed.xlsx", sep="")
     writeLines(c(sprintf("Saving processed data to file: %s", output_file_processed)), sep="\n")
-    xlsx::write.xlsx(df,
-                     file=output_file_processed,
-                     col.names=TRUE,
-                     row.names=FALSE)
+    xlsx::write.xlsx(within(df, {
+        conc_factor <- NULL;
+        neg_current <- NULL}),
+        file=output_file_processed,
+        col.names=TRUE,
+        row.names=FALSE)
     
     df |>
     analyze_fitter_and_extractor(
