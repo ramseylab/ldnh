@@ -1,3 +1,9 @@
+# version 0.1.4.9000
+
+    - Adding Gaussian kernel smoothing between the log-transformation step
+    and the detilting step, for compatibility with voltammograms from the
+    SIMStat.
+    
 # version 0.1.3.9000
 
     - The `process_voltammograms` function now will not give an error if there
