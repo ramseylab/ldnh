@@ -1,3 +1,11 @@
+# version 0.1.3.9000
+
+    - The `process_voltammograms` function now will not give an error if there
+    are extra named (or unnamed/empty) columns in the input spreadsheet of 
+    melted data, other than the four required columns named `potential`,
+    `device`, `conc`, and `current`. The script will now just ignore the
+    extra columns.
+
 # version 0.1.2.9000
 
     - Script can now handle the case where there are different combinations
