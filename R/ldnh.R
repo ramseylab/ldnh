@@ -398,7 +398,7 @@ process_voltammograms <- function(fit_calibration=TRUE, file_name=NULL) {
         peakfind_end_v <- as.numeric(peakfind_end_v)
     }
 
-    allowed_column_names <- c("potential",
+    required_column_names <- c("potential",
                               "device",
                               "conc",
                               "current")
@@ -406,9 +406,9 @@ process_voltammograms <- function(fit_calibration=TRUE, file_name=NULL) {
     {   ## just red the first line of the file, and check that the column names are correct
         df <- xlsx::read.xlsx(file_spec, sheetIndex=sheet_index, header=TRUE, endRow=2)
 
-        if (! all(names(df) %in% allowed_column_names)) {
-            stop(sprintf("Column name(s) in the file that are not recognized: %s",
-                         paste(names(df)[which(! (names(df) %in% allowed_column_names))])))
+        if (! all(required_column_names %in% names(df))) {
+            stop(sprintf("Column name(s) missing from the file: %s",
+                         paste(required_column_names[which(! (required_column_names %in% names(df)))])))
         }
     }
 
