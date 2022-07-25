@@ -1,3 +1,7 @@
+# version 0.1.5.9000
+
+    - Fixing bug where the `stringr` dependency wasn't listed in DESCRIPTION.
+    
 # version 0.1.4.9000
 
     - Adding Gaussian kernel smoothing between the log-transformation step

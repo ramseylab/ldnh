@@ -2,11 +2,12 @@
 
 export("%>%")
 export(convert_raw_to_melted_xlsx)
-export(process_voltammograms)
+export(smooth_data)
 import(Rdistance)
 import(SplinesUtils)
 import(ggplot2)
 import(magrittr)
 import(remotes)
+import(stringr)
 import(xlsx)
 importFrom(magrittr,"%>%")
