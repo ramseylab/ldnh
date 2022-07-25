@@ -14,7 +14,7 @@ bandwidth_default <- 0.05
 ## ----------------------------------------------------
 
 #'
-#' @import xlsx remotes Rdistance magrittr ggplot2 SplinesUtils  
+#' @import xlsx remotes Rdistance magrittr ggplot2 SplinesUtils stringr
 #'
 function() {}  ## this is required in order to force roxygen2::roxygenise to
                ## generate "import" directives in the NAMESPACE file
