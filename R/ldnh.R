@@ -30,7 +30,7 @@ plot_conc_faceted_voltammograms <- function(df, cur_var, ylab, file_name) {
         ggplot2::xlim(min_voltage, max_voltage) +
         ggplot2::theme_classic() +
         ggplot2::geom_line(size=0.5)
-    ggplot2::ggsave(p, file=file_name, height=6, width=3)
+    ggplot2::ggsave(p, file=file_name, height=2*length(levels(df$conc_factor)), width=3)
 }
 
 make_residual_calculator_passthrough <- function(current_var) {
