@@ -1,3 +1,9 @@
+# version 0.1.7.9000
+
+    - Changing default voltage for the right side of the normalization (i.e.,
+    "detilting") window to 1.135.
+    - Improving plotting code.
+   
 # version 0.1.6.9000
 
     - Fixing bug with export of `process_voltammograms`
