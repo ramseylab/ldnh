@@ -460,6 +460,7 @@ process_voltammograms <- function(fit_calibration=TRUE, file_name=NULL) {
                  commandArgs(),
                  sprintf("Potential range to be used for detilting: %f - %f V", detilt_start_v, detilt_end_v),
                  sprintf("Potential range to be used for peakfinding: %f - %f V", peakfind_start_v, peakfind_end_v),
+                 sprintf("Bandwidth for kernel smoothing: %f", bandwidth),
                  sprintf("User requested that a calibration curve be fit: %s", as.character(fit_calibration)),
                  sprintf("Input file: %s", file_spec)), sep="\n")
 
