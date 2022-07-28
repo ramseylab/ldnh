@@ -1,6 +1,6 @@
 Package: ldnh
 Title: Process square-wave voltammograms using LDNH method
-Version: 0.1.6.9000
+Version: 0.1.7.9000
 Authors@R: 
     person("Stephen", "Ramsey", , "ramseyst@oregonstate.edu", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-2168-5403"))
