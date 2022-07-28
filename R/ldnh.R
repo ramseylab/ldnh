@@ -5,7 +5,7 @@
 
 ## ---------- GLOBAL DEFAULT PARAMETER VALUES ---------
 detilt_start_v_default <- 1.00
-detilt_end_v_default <- 1.15
+detilt_end_v_default <- 1.135
 
 peakfind_start_v_default <- 1.00
 peakfind_end_v_default <- 1.10
