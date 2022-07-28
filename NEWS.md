@@ -1,3 +1,7 @@
+# version 0.1.6.9000
+
+    - Fixing bug with export of `process_voltammograms`
+
 # version 0.1.5.9000
 
     - Fixing bug where the `stringr` dependency wasn't listed in DESCRIPTION.
