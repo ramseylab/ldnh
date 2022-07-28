@@ -319,20 +319,6 @@ analyze_fitter_and_extractor <- function(raw_df_fac,
     list(all_results=res_with_signals)
 }
 
-#' Run the script `process-voltammograms.R` that is installed in the `ldnh` package.
-#'
-#' @param fit_calibration A logical indicating whether or not a calibration
-#'     curve should be fit to the signal-vs-concentration data; if TRUE, then
-#'     the `-processed.xlsx` output spreadsheet is generated; if FALSE, then the
-#'     `-processed.xlsx` output spreadsheet is not generated. Default: TRUE
-#' @param file_name An optional string specifying the location of the
-#'     spreadsheet (xlsx format) of melted data to be processed.
-#' @export
-#' @examples
-#' process_voltammograms()
-#' process_voltammograms(fit_calibration=FALSE)
-#' process_voltammograms(fit_calibration=TRUE, file_name="melted-data-20220429.xlsx")
-
 smooth_data <- function(df, invar, outvar, bandwidth) {
     lapply(levels(df$conc_factor), function(level) {
         dat_sub <- subset(df, conc_factor==level)
@@ -349,6 +335,20 @@ smooth_data <- function(df, invar, outvar, bandwidth) {
         }) %>% do.call(rbind, .)
     }) %>% do.call(rbind, .)
 }
+
+#' Run the script `process-voltammograms.R` that is installed in the `ldnh` package.
+#'
+#' @param fit_calibration A logical indicating whether or not a calibration
+#'     curve should be fit to the signal-vs-concentration data; if TRUE, then
+#'     the `-processed.xlsx` output spreadsheet is generated; if FALSE, then the
+#'     `-processed.xlsx` output spreadsheet is not generated. Default: TRUE
+#' @param file_name An optional string specifying the location of the
+#'     spreadsheet (xlsx format) of melted data to be processed.
+#' @export
+#' @examples
+#' process_voltammograms()
+#' process_voltammograms(fit_calibration=FALSE)
+#' process_voltammograms(fit_calibration=TRUE, file_name="melted-data-20220429.xlsx")
 
 process_voltammograms <- function(fit_calibration=TRUE, file_name=NULL) {
 

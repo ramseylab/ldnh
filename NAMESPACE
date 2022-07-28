@@ -2,7 +2,7 @@
 
 export("%>%")
 export(convert_raw_to_melted_xlsx)
-export(smooth_data)
+export(process_voltammograms)
 import(Rdistance)
 import(SplinesUtils)
 import(ggplot2)
