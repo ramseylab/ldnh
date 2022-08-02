@@ -538,15 +538,19 @@ process_voltammograms <- function(fit_calibration=TRUE, file_name=NULL) {
 
 
 get_voltammograms <- function(file_name) {
+    file_lines <- readLines(file_name)
+    inds_match <- grep("Potential/V, Diff[(]i/A[)], For[(]i/A[)], Rev[(]i/A[)]",  file_lines)
+    stopifnot(length(inds_match) == 1)
     read.table(file_name,
                sep=",",
                header=TRUE,
-               skip=22) %>%
+               skip=inds_match[1] - 1) %>%
         setNames(c("potential", "current", "forward", "reverse")) %>%
         `[`(c("potential", "current"))
 }
 
 get_data <- function(file_name) {
+    cat(sprintf("Loading file: %s\n", file_name))
     match_res <- stringr::str_match(file_name, "^(\\d+)_(\\d+)_(\\d+)_cbz([\\dp]+)_(\\d+).txt$")
     if (is.na(match_res[1, 1])) {
         stop(sprintf("Unable to process metadata from filename: %s", file_name))
