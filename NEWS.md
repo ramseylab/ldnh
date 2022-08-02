@@ -1,3 +1,8 @@
+# version 0.1.8.9000
+
+    - Fixing problem with `convert_raw_to_melted_xlsx` not working when the
+    raw potentiostat data file has extra lines in its file header
+    
 # version 0.1.7.9000
 
     - Changing default voltage for the right side of the normalization (i.e.,
