@@ -1,3 +1,7 @@
+# version 0.1.10.9000
+
+    - Fixing bug in `avg_cv` code
+    
 # version 0.1.9.9000
 
     - Adding new column `avg_cv` to the `-summary.xlsx` spreadsheet
