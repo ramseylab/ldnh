@@ -1,4 +1,4 @@
-# vresion 0.1.9.9000
+# version 0.1.9.9000
 
     - Adding new column `avg_cv` to the `-summary.xlsx` spreadsheet
 
