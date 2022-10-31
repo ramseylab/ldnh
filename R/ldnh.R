@@ -248,6 +248,14 @@ fit_and_evaluate_calibration_curve <- function(results_list,
 
     ## compute the correlation coefficient
     corrcoef <- cor(res_with_signals$conc, res_with_signals$signal)
+
+    signals_with_concs <- res_with_signals[, c("conc_factor", "signal")]
+    cvs_per_conc <- aggregate(signal ~ conc_factor,
+                              data=signals_with_concs,
+                              FUN=sd)$signal /
+                                    aggregate(signal ~ conc_factor,
+                                              data=signals_with_concs,
+                                              FUN=mean)$signal
     
     ## make plots if a plotting filename prefix is provided
     if (! is.null(plot_file_prefix)) {
@@ -264,7 +272,8 @@ fit_and_evaluate_calibration_curve <- function(results_list,
              r=corrcoef,
              r2=corrcoef*corrcoef,
              slope=model_coefficients["signal"],
-             intercept=model_coefficients["(Intercept)"]))
+             intercept=model_coefficients["(Intercept)"],
+             avg_cv=mean(cvs_per_conc)))
 }
 
 
