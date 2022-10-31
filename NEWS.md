@@ -1,3 +1,7 @@
+# vresion 0.1.9.9000
+
+    - Adding new column `avg_cv` to the `-summary.xlsx` spreadsheet
+
 # version 0.1.8.9000
 
     - Fixing problem with `convert_raw_to_melted_xlsx` not working when the
