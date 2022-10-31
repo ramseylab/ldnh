@@ -253,9 +253,9 @@ fit_and_evaluate_calibration_curve <- function(results_list,
     cvs_per_conc <- aggregate(signal ~ conc_factor,
                               data=signals_with_concs,
                               FUN=sd)$signal /
-                                    aggregate(signal ~ conc_factor,
+                                    abs(aggregate(signal ~ conc_factor,
                                               data=signals_with_concs,
-                                              FUN=mean)$signal
+                                              FUN=mean)$signal)
     
     ## make plots if a plotting filename prefix is provided
     if (! is.null(plot_file_prefix)) {
