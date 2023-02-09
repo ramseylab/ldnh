@@ -1,3 +1,7 @@
+# version 0.1.11.9000
+
+    - Fixing issue #1
+    
 # version 0.1.10.9000
 
     - Fixing bug in `avg_cv` code
