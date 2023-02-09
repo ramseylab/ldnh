@@ -22,5 +22,5 @@ Imports:
         SplinesUtils (>= 0.2),
         stringr (>= 1.4.0)
 Remotes:
-        ZheyuanLi/SplinesUtils
+        ZheyuanLi/SplinesUtils,
         tmcd82070/Rdistance
