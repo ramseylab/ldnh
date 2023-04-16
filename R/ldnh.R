@@ -190,7 +190,10 @@ make_signal_extractor_hessian <- function(eval_hessian_at_potential_var_name,
         sm <- smooth.spline(sub_df$potential, sub_df[[input_y_var_name]])
         window_center <- sub_df[[eval_hessian_at_potential_var_name]][1]
         res_df <- df[1, c("conc_factor", "device", "conc"), drop=FALSE]
-        res_df[["peak_potential"]] <- sub_df[["peak_potential"]][1]
+        peak_potential <- sub_df[["peak_potential"]][1]
+        res_df[["peak_potential"]] <- peak_potential
+        y_value_at_peak <- predict(sm, peak_potential)$y
+        res_df[["y_value_at_peak"]] <- y_value_at_peak
         res_df[[output_y_var_name]] <- as.vector(-Rdistance::secondDeriv(window_center, FUN=function(x) {predict(sm, x)$y}))
         res_df
     }
@@ -256,6 +259,96 @@ fit_and_evaluate_calibration_curve <- function(results_list,
                                     abs(aggregate(signal ~ conc_factor,
                                               data=signals_with_concs,
                                               FUN=mean)$signal)
+    concs_no_0 <- subset(signals_with_concs, conc_factor!="0")
+    concs_just_0 <- subset(signals_with_concs, conc_factor=="0")
+    signal_mean_no_0 <- mean(concs_no_0$signal)
+    
+    a <- as.integer(length(concs_no_0))
+    if (as.integer(length(concs_no_0)) == 0) {
+      cvs_per_conc_no_0 <- list(0)
+    }
+    else {
+      cvs_per_conc_no_0 <- aggregate(signal ~ conc_factor,
+                                     data=concs_no_0,
+                                     FUN=sd)$signal /
+        abs(aggregate(signal ~ conc_factor,
+                      data=concs_no_0,
+                      FUN=mean)$signal)
+    }
+    
+    if (length(concs_just_0) == 0) {
+      cv_conc_0 <- list(0)
+    }
+    else {
+      cv_conc_0 <- aggregate(signal ~ conc_factor,
+                             data=concs_just_0,
+                             FUN=sd)$signal /
+        abs(aggregate(signal ~ conc_factor,
+                      data=concs_just_0,
+                      FUN=mean)$signal)
+      
+    }
+    
+    for (cv in cvs_per_conc) {
+      cv <- as.character(cv)
+      if (exists("cv_str")) {
+        cv_str <- paste(cv_str, cv, sep=", ")
+      }
+      else {
+        cv_str <- cv
+      }
+    }
+    
+    ## calculate average peak potentials
+    peak_potentials_with_concs <- res_with_signals[, c("conc_factor", "peak_potential")]
+    peak_concs_no_0 <- subset(peak_potentials_with_concs, conc_factor!="0")
+    peak_concs_just_0 <- subset(peak_potentials_with_concs, conc_factor=="0")
+    
+    mean_no_0 <- mean(peak_concs_no_0$peak_potential)
+    mean_just_0 <- mean(peak_concs_just_0$peak_potential)
+    
+    pp_cvs_per_conc <- aggregate(peak_potential~ conc_factor,
+                                 data=peak_potentials_with_concs,
+                                 FUN=sd)$peak_potential /
+      abs(aggregate(peak_potential ~ conc_factor,
+                    data=peak_potentials_with_concs,
+                    FUN=mean)$peak_potential)
+    
+    a <- as.integer(length(peak_concs_no_0))
+    if (as.integer(length(peak_concs_no_0)) == 0) {
+      peak_cvs_per_conc_no_0 <- list(0)
+    }
+    else {
+      peak_cvs_per_conc_no_0 <- aggregate(peak_potential ~ conc_factor,
+                                          data=peak_concs_no_0,
+                                          FUN=sd)$peak_potential /
+        abs(aggregate(peak_potential ~ conc_factor,
+                      data=peak_concs_no_0,
+                      FUN=mean)$peak_potential)
+    }
+    
+    if (length(peak_concs_just_0) == 0) {
+      peak_cv_conc_0 <- list(0)
+    }
+    else {
+      peak_cv_conc_0 <- aggregate(peak_potential ~ conc_factor,
+                                  data=peak_concs_just_0,
+                                  FUN=sd)$peak_potential /
+        abs(aggregate(peak_potential ~ conc_factor,
+                      data=peak_concs_just_0,
+                      FUN=mean)$peak_potential)
+      
+    }
+    
+    for (cv in pp_cvs_per_conc) {
+      cv <- as.character(cv)
+      if (exists("PP_cv_str")) {
+        PP_cv_str <- paste(PP_cv_str, cv, sep=", ")
+      }
+      else {
+        PP_cv_str <- cv
+      }
+    }
     
     ## make plots if a plotting filename prefix is provided
     if (! is.null(plot_file_prefix)) {
@@ -272,8 +365,16 @@ fit_and_evaluate_calibration_curve <- function(results_list,
              r=corrcoef,
              r2=corrcoef*corrcoef,
              slope=model_coefficients["signal"],
-             intercept=model_coefficients["(Intercept)"],
-             avg_cv=mean(cvs_per_conc)))
+             intercept=model_coefficients["(Intercept)"]),
+             signal_mean_no_0 = signal_mean_no_0,
+             signal_cvs_per_conc = cv_str,
+             signal_cv_0 = cv_conc_0,
+             signal_avg_cv_no_0 = mean(cvs_per_conc_no_0),
+             avg_PP_no_0 = mean_no_0,
+             avg_PP_just_0 = mean_just_0,
+             pp_cvs_per_conc = PP_cv_str,
+             peak_cv_0 = peak_cv_conc_0,
+             peak_cv_no_0 = mean(peak_cvs_per_conc_no_0))
 }
 
 
