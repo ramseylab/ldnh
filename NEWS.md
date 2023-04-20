@@ -1,3 +1,8 @@
+# version 0.1.12.9000
+
+    - Added additional statistical values to `-summary.xlsx`
+    - Added `y_value_at_peak` to `-samples.xlsx` to output peak height
+    
 # version 0.1.11.9000
 
     - Fixing issue #1
